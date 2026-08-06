@@ -1,6 +1,6 @@
 # Implementation Planning
 
-**Prompt version:** 1.5
+**Prompt version:** 1.7
 
 ## Role
 You are a technical project manager translating approved documentation into an implementation roadmap.
@@ -63,7 +63,10 @@ Every level of the hierarchy carries a status, and each level's status is a roll
 ```
 Todo    — checkbox per item in {{task_id}}-todos.md (checked = done)
 Task    — task-list.md + sprint file: Available / Claimed / In Progress / Blocked / Done / Cancelled
-Epic    — epics.md: Not Started (no tasks started) / In Progress (some but not all Done, excluding Cancelled) / Complete (all non-Cancelled tasks Done **and** `9-sync-docs/2-module-completion-review.md` has passed clean for this epic **and**, for a `<Module> — Backend/API` epic, the user has confirmed the module's real functionality live in a browser per that prompt's closing step — Claude's own automated checks passing is necessary but not sufficient for this epic type)
+Epic    — epics.md: Not Started (no tasks started) / In Progress (some but not all Done, excluding Cancelled) / Complete —
+  - **For a `<Module> — Backend/API` epic** (or a module's single epic under a fully vertical structure): all non-Cancelled tasks Done **and** `9-sync-docs/2-module-completion-review.md` has passed clean for this epic **and** the user has confirmed the module's real functionality live in a browser per that prompt's closing step — Claude's own automated checks passing is necessary but not sufficient here. This is the epic where real code exists to check design fidelity against, trace data-flow through, and verify docs-vs-code against — `9-sync-docs/2-module-completion-review.md` is scoped to run here, not against the UI-only epic below.
+  - **For a `<Module> — UI Design` epic**: all non-Cancelled tasks Done **and** Design Status is `Approved` (per the developer's live-browser review loop in `8-implementation/1-implement-task.md`'s Module Design-First Strategy) is sufficient. Do **not** also require `9-sync-docs/2-module-completion-review.md` here — its data-flow and docs-vs-code checks need real backend code that doesn't exist yet at this stage; running it against mock-only pages would be premature. The Design Status review loop already serves as this epic's completion gate.
+  - **For a non-module epic** (Environment Setup, App Shell/Chrome, the standing Maintenance epic, or any other epic with no corresponding `docs-kit/5-modules/<slug>/`): all non-Cancelled tasks Done is sufficient — `9-sync-docs/2-module-completion-review.md` cannot run against an epic with no module to review, so don't require it. Don't let this become a loophole for module work, though — an epic is only "non-module" if it genuinely has no `5-modules/` counterpart, not because someone skipped documenting one.
 Sprint  — sprint-{{n}}.md: Not Started / In Progress / Complete (same rollup rule, over its own task subset)
 Milestone — milestone-status.md: Not Started / In Progress / Complete (all epics Complete) / Released (1-release.md ran)
 ```

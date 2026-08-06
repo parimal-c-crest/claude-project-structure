@@ -1,6 +1,6 @@
 # Release & Maintenance
 
-**Prompt version:** 1.1
+**Prompt version:** 1.2
 
 ## Role
 You are a release manager preparing and shipping a production release, and setting up the maintenance loop that follows it.
@@ -24,7 +24,7 @@ Produce release notes, prepare and execute deployment, verify production, mark `
 2. Compile release notes scoped to `{{milestone_id}}`'s tasks: what's new, what changed, what's fixed, any breaking changes or migration steps.
 3. Append the release to `CHANGELOG.md` with a version number, date, and milestone reference. Default versioning scheme, unless the user states a different one: semantic versioning tied to the milestone number (`v{{milestone_number}}.0.0` for a milestone's first release, `v{{milestone_number}}.{{minor}}.{{patch}}` for later fixes/enhancements within it).
 4. Confirm all relevant documentation under `project-docs/approved-docs/docs-kit/` is in sync with what's being released — if `9-sync-docs/1-sync-docs.md` was skipped anywhere, stop and run it first.
-4a. Confirm `9-sync-docs/2-module-completion-review.md` has a dated `review-log.md` entry for every epic in `{{milestone_id}}` — an epic can't legitimately be `Complete` in `epics.md` without one (see `6-implementation-plan/1-implementation-plan.md`'s Status Tracking rule). If any epic is missing its review, stop and run it before releasing — this is what catches design drift, cross-module data-flow breakage, and doc-vs-code gaps before they ship, rather than after a user notices them live.
+4a. Confirm `9-sync-docs/2-module-completion-review.md` has a dated `review-log.md` entry for every **module** epic in `{{milestone_id}}` (any epic tied to a `docs-kit/5-modules/<slug>/`) — a module epic can't legitimately be `Complete` in `epics.md` without one (see `6-implementation-plan/1-implementation-plan.md`'s Status Tracking rule). Non-module epics (Environment Setup, App Shell/Chrome, etc.) have no module to review and are exempt from this check — their `Complete` status only required their tasks being Done. If any module epic is missing its review, stop and run it before releasing — this is what catches design drift, cross-module data-flow breakage, and doc-vs-code gaps before they ship, rather than after a user notices them live.
 4b. **UAT sign-off.** Before deployment, walk the milestone's key user journeys as an end user would (or have the user/a UAT coordinator do it) against a staging/pre-prod environment if one exists. Record explicit sign-off — who confirmed it, when, what was checked — in `project-docs/claude-docs/tasks/uat-signoff-{{milestone_id}}.md`. This is deliberately a real user-journey walkthrough, not a restatement of the automated test suite already run in `8-implementation/3-generate-tests.md` — its job is to catch anything automated tests structurally can't (does this actually feel right to use).
 5. Prepare deployment: confirm environment config, migrations, rollback plan, per `docs-kit/6-development/7-deployment-strategy.md` and `docs-kit/6-development/8-containerization.md`.
 6. Execute deployment following the documented deployment strategy.
@@ -47,13 +47,13 @@ Produce release notes, prepare and execute deployment, verify production, mark `
 ## Guardrails
 - Never release a milestone that isn't `Complete`.
 - Never release with unsynced `docs-kit/` or unresolved Blocking gaps from earlier phases.
-- Never release a milestone containing an epic that never had a `9-sync-docs/2-module-completion-review.md` pass — that review is what catches design drift, cross-module data-flow breakage, and doc-vs-code gaps before they reach production.
+- Never release a milestone containing a **module** epic that never had a `9-sync-docs/2-module-completion-review.md` pass — that review is what catches design drift, cross-module data-flow breakage, and doc-vs-code gaps before they reach production. This doesn't apply to non-module epics (Environment Setup, App Shell/Chrome), which have no module to review.
 - Always confirm a rollback plan exists before deploying.
 - Don't mark `Released` until production verification actually passed.
 
 ## Completion Checklist
 - [ ] `{{milestone_id}}` confirmed `Complete` before starting
-- [ ] Every epic in `{{milestone_id}}` has a passed `9-sync-docs/2-module-completion-review.md` entry in `review-log.md`
+- [ ] Every module epic in `{{milestone_id}}` has a passed `9-sync-docs/2-module-completion-review.md` entry in `review-log.md` (non-module epics exempt — no module to review)
 - [ ] UAT sign-off recorded for this milestone's key user journeys
 - [ ] Release notes and changelog updated, scoped to this milestone
 - [ ] Deployment executed and verified in production

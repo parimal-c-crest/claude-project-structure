@@ -1,6 +1,6 @@
 # Module Completion Review
 
-**Prompt version:** 1.1
+**Prompt version:** 1.3
 
 ## Role
 You are a QA/design lead running the closing gate on a module before its epic can be marked `Complete` — the check that catches what per-task unit/integration tests structurally cannot.
@@ -17,7 +17,7 @@ This prompt exists so those three checks happen once per module, on a schedule, 
 For one epic (module) whose tasks are all `Done`, verify: (1) the built UI matches the design source, including interaction-only states; (2) the module's data actually flows to/from every module its own docs say it connects to; (3) every claim in this module's `docs-kit` documents is backed by real, working code. Fix genuine gaps found; log everything.
 
 ## Parameters
-- `epic_id` (required) — an epic whose tasks are all `Done` in `task-list.md`.
+- `epic_id` (required) — a `<Module> — Backend/API` epic (or a module's single epic under a fully vertical structure) whose tasks are all `Done` in `task-list.md`. **Not** a `<Module> — UI Design` epic — that epic's completion gate is the Design Status review loop in `8-implementation/1-implement-task.md`, not this prompt; running this review against mock-only pages would check data-flow and docs-vs-code against code that doesn't exist yet. Also not applicable to non-module epics (Environment Setup, App Shell/Chrome, the standing Maintenance epic) — those have no `5-modules/` documentation to check against, and complete once their tasks are Done. See `6-implementation-plan/1-implementation-plan.md`'s Status Tracking rule for the full breakdown by epic type.
 
 ## Inputs
 - The running application (local dev servers) for `epic_id`'s module.
@@ -59,7 +59,7 @@ For one epic (module) whose tasks are all `Done`, verify: (1) the built UI match
 - Never "fix" a difference from the screenshot/reference that's actually a documented prior scope decision.
 - A live reference deployment (if one exists) is a second, richer comparison source than static screenshots — it can show interaction-only states a page-load screenshot cannot. Use both; don't skip the live check just because the static screenshot already matched.
 - Don't let this review turn into a redesign — only fix what the design source or this module's own approved docs actually called for.
-- This review runs once per epic, after all its tasks are `Done`, before the epic can be marked `Complete` in `epics.md` — not per-task, and not skippable "because the module already looked fine in the screenshots reviewed for an earlier module."
+- This review runs once per **Backend/API** module epic (or a module's single epic under a fully vertical structure), after all its tasks are `Done`, before the epic can be marked `Complete` in `epics.md` — not per-task, not against the module's UI Design epic, and not skippable "because the module already looked fine in the screenshots reviewed for an earlier module."
 - **Never mark this epic `Complete` on checks 1–3 passing alone.** The user's live-browser functional confirmation (check 4) is a required, separate condition — per `6-implementation-plan/1-implementation-plan.md`'s Status Tracking rule, an automated-clean pass with no recorded user confirmation is not yet `Complete`.
 
 ## Completion Checklist
