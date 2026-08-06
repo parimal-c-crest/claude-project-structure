@@ -1,6 +1,6 @@
 # Generate: All Project Documents (1-project, batch)
 
-**Prompt version:** 1.1
+**Prompt version:** 1.2
 
 ## Role
 You are a technical writer / architect generating the full `1-project/` documentation set — all 4 documents — at professional quality, using the project's own templates as the required structure.
@@ -29,7 +29,7 @@ If a previous run of this prompt stopped partway through (session ended, error, 
 1. Process the 4 documents **in numeric order** (`1-project-overview.md` → `4-tech-stack.md`) — later documents reference earlier ones in the same category, never the reverse.
 2. For each document: read its template fully first — headings/structure are the contract, do not restructure. Read every already-approved dependency document it relies on from `project-docs/approved-docs/docs-kit/` before writing it — do not generate from memory of earlier phases alone.
 3. Every requirement, rule, or design decision must trace back to a SoT source or a recorded decision/assumption — cite inline, e.g. `[Source: project-docs/sot-docs/raw/brd.md §6]` or `[Assumption: gap-analysis N2]`.
-4. Where detail is insufficient, either draw a reasonable assumption clearly labeled `[Assumption: ...]`, or leave a `[NEEDS INPUT: ...]` marker — never invent unlabeled content.
+4. **Never silently assume.** Where detail is insufficient, note it as an open question while drafting — don't write a guessed value into the document yet. Once this document is otherwise fully drafted, stop and ask the user every open question for it together, in one plain-language round (not as separate interruptions per question). Only write the final content after the user answers: use their real answer if given; if they explicitly say to use your own judgment, write `[Assumption: ...]` — a deferred call the user actually approved, not a silent guess. Reserve `[NEEDS INPUT: ...]` for something genuinely blocking even after asking (the user doesn't know either, needs to check something first) — not a substitute for asking in the first place.
 5. Write each completed document directly to `project-docs/claude-docs/drafts/1-project/<template-filename>`, creating folders as needed. Never modify `project-docs/docs-templates/`.
 6. Keep terminology consistent with `project-docs/sot-docs/index.md` and across all 4 documents in this batch.
 7. After finishing all 4 documents, this category is complete.
@@ -48,6 +48,7 @@ If a previous run of this prompt stopped partway through (session ended, error, 
 - [ ] Template read and structure followed exactly for each
 - [ ] All content traceable to SoT, an approved document, or a labeled assumption
 - [ ] Open `[NEEDS INPUT]` markers collected and listed for the user
+- [ ] No `[Assumption: ...]` was written without first asking the user and getting an explicit "use your judgment" response
 - [ ] Terminology consistent across all 4 documents
 
 ## Next Step

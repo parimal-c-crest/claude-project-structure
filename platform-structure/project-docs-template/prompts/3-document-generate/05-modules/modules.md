@@ -1,17 +1,20 @@
 # Generate: All Modules (5-modules, batch)
 
-**Prompt version:** 1.3
+**Prompt version:** 1.5
 
 ## Role
-You are a technical writer / architect generating one module's full documentation set — all 11 of its documents — at professional quality, using the project's own templates as the required structure. Run once per module, across every module in `module-list.md`.
+You are a technical writer / architect generating one module's full documentation set — all 11 of its documents — at professional quality, using the project's own templates as the required structure.
+
+## Trigger — just-in-time, not an upfront batch
+Under this template's default flow, this prompt does **not** run for every module during initial documentation generation. It's triggered by `7-sprint-planning/1-sprint-planning.md` step 2a, once per module, the first time that module's `<Module> — UI Design` or `<Module> — Backend/API` epic is a candidate for an upcoming sprint and its docs don't exist yet. This spreads module documentation across the project's actual build timeline instead of front-loading all of it before any module is touched — a module that won't be built for months doesn't get documented months early.
 
 ## Objective
-For one module at a time, in dependency order, fill all 11 templates under `project-docs/docs-templates/5-modules/templates/` and write the result to `project-docs/claude-docs/drafts/5-modules/<module-slug>/`, mirroring the template filenames exactly.
+For one module, fill all 11 templates under `project-docs/docs-templates/5-modules/templates/` and write the result to `project-docs/claude-docs/drafts/5-modules/<module-slug>/`, mirroring the template filenames exactly.
 
-This is the only `5-modules` prompt — it covers all 11 documents for **one module per run**, matching every other batch file's cadence of one confirmed run → one review → one promotion, at module granularity rather than category granularity (`5-modules/` has no single "category" review the way `1-project/` does — each module is its own reviewable unit). Run this prompt once per module: draft the module's 11 documents, run `4-document-review/1-document-review.md` scoped to that module, then re-run this file for the next module in dependency order. To regenerate a single document for a single module, re-run this prompt but scope step 8 to just that module/file instead of a full module.
+This is the only `5-modules` prompt — it covers all 11 documents for **one module per run**, matching every other batch file's cadence of one confirmed run → one review → one promotion, at module granularity rather than category granularity (`5-modules/` has no single "category" review the way `1-project/` does — each module is its own reviewable unit). Run this prompt once, whenever `7-sprint-planning/1-sprint-planning.md` step 2a triggers it for a module: draft the module's 11 documents, run `4-document-review/1-document-review.md` scoped to that module, then continue that gate's remaining steps (late-wave `6-development/` docs, task derivation) before returning to sprint planning. To regenerate a single document for a single module, re-run this prompt but scope step 8 to just that module/file instead of a full module.
 
 ## Resuming an interrupted run
-If a previous run of this prompt stopped partway through a module (session ended, error, anything else), don't restart that module from document 1. Check `project-docs/claude-docs/drafts/5-modules/<module-slug>/` for which of its 11 files already exist — resume from the next missing document, in numeric order. Also check `project-docs/approved-docs/docs-kit/5-modules/` for which modules are already fully approved — never regenerate a module that's already promoted; move on to the next one in dependency order instead.
+If a previous run of this prompt stopped partway through a module (session ended, error, anything else), don't restart that module from document 1. Check `project-docs/claude-docs/drafts/5-modules/<module-slug>/` for which of its 11 files already exist — resume from the next missing document, in numeric order.
 
 ## Prerequisites — stop and report if missing
 - `project-docs/approved-docs/docs-kit/1-project/` fully generated and approved
@@ -19,6 +22,7 @@ If a previous run of this prompt stopped partway through a module (session ended
 - `project-docs/approved-docs/docs-kit/3-api/` fully generated and approved
 - `project-docs/approved-docs/docs-kit/4-ui/` fully generated and approved
 - `project-docs/claude-docs/analysis/module-list.md` — if missing, run `project-docs/prompts/1-discovery/5-project-analysis.md` first rather than guessing the module list.
+- **This module's own dependencies, if any are recorded in `project-docs/claude-docs/plan/dependencies.md`** (e.g. a module that manages records depends on the module that defines who can own them) **are already approved under `docs-kit/5-modules/`.** Under the just-in-time trigger (see above), sprint planning normally surfaces modules in a workable order already since a dependency's own epic would need to be scheduled first — but if this module was triggered out of order, stop and name the missing dependency rather than guessing its content.
 
 Modules reference these global standards rather than repeating them — do not proceed with any module until all four exist. If one is missing or incomplete, name it and stop.
 
@@ -35,11 +39,11 @@ Modules reference these global standards rather than repeating them — do not p
 - Already-completed modules under `project-docs/approved-docs/docs-kit/5-modules/` — later modules may reference earlier ones (e.g. a module reading another module's schema for a foreign key it depends on), never the reverse.
 
 ## Instructions
-1. Read `module-list.md` and `documentation-plan.md` to get the module processing order (dependency order, not alphabetical — foundational modules like identity/access management typically come before modules that depend on them, which in turn come before modules that aggregate across several others, e.g. dashboards/reports).
-2. Process **one module fully before starting the next**. Within a module, fill the 11 templates **in numeric order** (`1-module.md` → `11-testing.md`) — later documents in the set reference earlier ones in the same module, never the reverse.
+1. This run is scoped to whichever single module `7-sprint-planning/1-sprint-planning.md` step 2a named. Read `module-list.md` for that module's slug and `dependencies.md` for anything it depends on (see Prerequisites above).
+2. Fill the 11 templates **in numeric order** (`1-module.md` → `11-testing.md`) for this module only — later documents in the set reference earlier ones in the same module, never the reverse.
 3. For each document: read its template fully first — headings/structure are the contract, do not restructure. Read the global standards and any already-completed module docs it depends on.
 4. Every requirement, rule, or design decision must trace back to a SoT source or a recorded decision/assumption — cite inline, e.g. `[Source: project-docs/sot-docs/raw/brd.md §6]` or `[Assumption: gap-analysis N2]`.
-5. Where detail is insufficient, either draw a reasonable assumption clearly labeled `[Assumption: ...]`, or leave a `[NEEDS INPUT: ...]` marker — never invent unlabeled content.
+5. **Never silently assume.** Where detail is insufficient, note it as an open question while drafting — don't write a guessed value into the document yet. Once this document is otherwise fully drafted, stop and ask the user every open question for it together, in one plain-language round (not as separate interruptions per question). Only write the final content after the user answers: use their real answer if given; if they explicitly say to use your own judgment, write `[Assumption: ...]` — a deferred call the user actually approved, not a silent guess. Reserve `[NEEDS INPUT: ...]` for something genuinely blocking even after asking (the user doesn't know either, needs to check something first) — not a substitute for asking in the first place.
 6. Keep terminology, field names, and status/enum values consistent across all 11 docs within a module, and across modules that share entities (e.g. if two modules both reference the same record's status field, its allowed values must match in both) — and consistent with `decisions-log.md` specifically for anything cross-cutting (role scope, shared enums, ID conventions). Never let a module document quietly redecide something already locked there.
 6a. **When writing `9-ui.md`, if a visual reference exists for this module's screens (per `design-source.md`), walk every one of them literally first.** For each screen, record the concrete, observable facts — exact fields/buttons/labels/copy, layout regions, component patterns reused from `4-ui/3-design-system.md` — and any state only reachable by interacting (a drawer, a modal, a feed that only renders after a click), as a specific checklist, not generic prose. This is what implementation will build directly from — vague, general-purpose descriptions here are exactly how the built UI ends up drifting from the reference without anyone noticing until a later screenshot comparison catches it.
 7. Write each completed document directly to `project-docs/claude-docs/drafts/5-modules/<module-slug>/<template-filename>`, creating folders as needed. Never modify `project-docs/docs-templates/`.
@@ -60,7 +64,8 @@ Modules reference these global standards rather than repeating them — do not p
 - [ ] This module's 11 documents present, in numeric order
 - [ ] All content traceable to SoT, an approved document, or a labeled assumption
 - [ ] Open `[NEEDS INPUT]` markers collected and listed for the user
+- [ ] No `[Assumption: ...]` was written without first asking the user and getting an explicit "use your judgment" response
 - [ ] Terminology/status values consistent with modules already approved that share entities
 
 ## Next Step
-This module's drafts are complete. Run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `5-modules/<module-slug>` next — nothing here is promoted into `approved-docs/docs-kit/` until it does. Once this module is approved, re-run this same file for the next module in dependency order per `module-list.md`/`documentation-plan.md`. Once every module is approved, run `project-docs/prompts/3-document-generate/06-development/development.md` for its late wave (`5-implementation-workflow.md` onward — the wave that references the finished modules).
+This module's drafts are complete. Run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `5-modules/<module-slug>` next — nothing here is promoted into `approved-docs/docs-kit/` until it does. Once approved, control returns to `7-sprint-planning/1-sprint-planning.md` step 2a, which continues its gate: `3-document-generate/06-development/development.md` late wave scoped to this module, then a scoped `6-implementation-plan/1-implementation-plan.md` re-run to derive this module's real task list, before sprint planning resumes. This prompt only re-runs for the *next* module whenever that module's own epic is later selected into a sprint — not automatically back-to-back.

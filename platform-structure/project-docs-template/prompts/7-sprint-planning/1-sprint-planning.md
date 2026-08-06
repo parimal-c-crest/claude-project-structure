@@ -1,6 +1,6 @@
 # Sprint Planning
 
-**Prompt version:** 1.3
+**Prompt version:** 1.4
 
 ## Role
 You are a delivery lead planning the next sprint from the existing task backlog.
@@ -31,6 +31,18 @@ Determine the active milestone, then select, prioritize, and commit a specific s
    - If none is `In Progress`, take the next milestone in build order whose status is `Not Started`, set it to `In Progress`, and use it as the active milestone.
    - If the current `In Progress` milestone has every one of its epics marked `Complete` in `epics.md` (read epic status, not raw tasks — epics.md is kept in sync with task-list.md by `8-implementation/`), mark the milestone `Complete` in `milestone-status.md` and tell the user to run `10-release/1-release.md` for it. **Do not** advance to the next milestone until this one's status is `Released` — stop here and wait rather than planning a sprint against the next milestone.
 2. Confirm sprint length and available capacity with the user if not already stated.
+2a. **Just-in-time module documentation gate.** Under this template's default flow, `<Module> — UI Design` and `<Module> — Backend/API` epics no longer get their module documentation generated upfront in `3-document-generate/05-modules/`— it's deferred until the module's epic is actually about to enter a sprint. For every epic in the active milestone that's a candidate for this sprint (has `Available` tasks or, more likely at this point, no tasks yet because its module was never documented), check `project-docs/approved-docs/docs-kit/5-modules/<module-slug>/` for that module. If it doesn't exist or isn't fully approved, stop before pulling candidate tasks for that epic and run, in order:
+   1. `project-docs/prompts/3-document-generate/05-modules/modules.md`, scoped to just this module.
+   2. `project-docs/prompts/4-document-review/1-document-review.md`, scoped to this module.
+   3. `project-docs/prompts/3-document-generate/06-development/development.md`, late wave, scoped to this module only (not the old "wait for every module" condition — see that prompt's updated Prerequisites).
+   4. `project-docs/prompts/4-document-review/1-document-review.md` again, scoped to that late-wave slice.
+   5. `project-docs/prompts/5-update-sot/1-update-sot.md`, to fold this module's newly-approved documents into `sot-docs/index.md` before planning derives tasks from them.
+   6. Re-run `project-docs/prompts/6-implementation-plan/1-implementation-plan.md`, scoped to just this module's epic(s), to derive its real task list — it was created as an empty/TBD shell when the milestone was first planned, precisely so this step has an epic to attach tasks to.
+   7. Return here and continue sprint planning for that epic, now that it has real, `Available` tasks.
+
+   If the epic is `<Module> — UI Design` (this module's first touch, Milestone 2), don't wait for the normal sprint cycle to pick up its task — hand off immediately to `project-docs/prompts/8-implementation/1-implement-task.md` for it, which builds the module's static/mock-data pages per its Module Design-First Strategy. Once the developer approves those pages (Design Status `Approved`), come back here to finish planning the rest of this sprint's tasks. If the epic is `<Module> — Backend/API` (module already has its UI from an earlier sprint), no special hand-off — its tasks just enter the normal candidate pool in step 3 below.
+
+   Skip this step entirely for an epic whose module docs are already approved (e.g. every epic after the first sprint that touched it) — proceed straight to step 3 for it.
 3. Pull candidate tasks from `project-docs/claude-docs/plan/task-list.md` that belong to the active milestone's epics, are `Available` (not `Cancelled`), and are unblocked (dependencies already completed or in this sprint in valid order).
 4. Prioritize by: dependency-unblocking value (tasks that unblock the most other work first — scaffolding/setup tasks are almost always highest priority for exactly this reason, see the Sprint 1 note above), epic priority within the milestone, and estimated effort vs. remaining capacity.
 5. Confirm the selected scope fits capacity — don't overcommit; leave a small buffer.
@@ -56,6 +68,7 @@ Determine the active milestone, then select, prioritize, and commit a specific s
 ## Completion Checklist
 - [ ] Previous sprint's retro (if any) read and its takeaways actually applied, not just noted
 - [ ] Active milestone determined from `milestone-status.md`
+- [ ] Just-in-time module documentation gate (step 2a) run for any candidate epic whose module docs weren't already approved
 - [ ] Milestone marked `Complete` and release flagged if this run found all its epics Complete
 - [ ] Sprint goal defined
 - [ ] Every selected task passes Definition of Ready (step 6) — none entered the sprint with an open `[NEEDS INPUT]` or an unmet dependency
@@ -64,4 +77,4 @@ Determine the active milestone, then select, prioritize, and commit a specific s
 - [ ] Sprint backlog file created with its own status initialized to `Not Started`
 
 ## Next Step
-Run `project-docs/prompts/8-implementation/1-implement-task.md` next — it works through this sprint's tasks in order, one at a time.
+Run `project-docs/prompts/7-sprint-planning/3-generate-sprint-page.md` next — it generates a one-page HTML view of this sprint. That prompt then hands off to `project-docs/prompts/8-implementation/1-implement-task.md`, which works through this sprint's tasks in order, one at a time.

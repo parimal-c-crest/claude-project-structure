@@ -1,6 +1,6 @@
 # Generate: All UI Documents (4-ui, batch)
 
-**Prompt version:** 1.1
+**Prompt version:** 1.2
 
 ## Role
 You are a technical writer / architect generating the full `4-ui/` documentation set — all 8 documents — at professional quality, using the project's own templates as the required structure.
@@ -35,7 +35,7 @@ If a previous run of this prompt stopped partway through, don't restart from doc
    - `stitch-generate` checked → confirm a Stitch MCP tool is actually available in this session before relying on it; if not, stop and tell the user it needs to be connected (`claude mcp add stitch ...` + session restart) rather than silently falling back to defaults.
    - `none` checked, or `design-source.md`/all referenced files are missing → fall back to a professional default token set (e.g. built on the chosen CSS framework's standard scale) and mark every token `[Assumption: this document]`, clearly noting in the Executive Summary that no brand/visual reference was available.
 5. Every requirement, rule, or design decision must trace back to a SoT source or a recorded decision/assumption — cite inline, e.g. `[Source: project-docs/sot-docs/raw/brd.md §6]` or `[Assumption: gap-analysis N2]`.
-6. Where detail is insufficient, either draw a reasonable assumption clearly labeled `[Assumption: ...]`, or leave a `[NEEDS INPUT: ...]` marker — never invent unlabeled content.
+6. **Never silently assume.** Where detail is insufficient, note it as an open question while drafting — don't write a guessed value into the document yet. Once this document is otherwise fully drafted, stop and ask the user every open question for it together, in one plain-language round (not as separate interruptions per question). Only write the final content after the user answers: use their real answer if given; if they explicitly say to use your own judgment, write `[Assumption: ...]` — a deferred call the user actually approved, not a silent guess. Reserve `[NEEDS INPUT: ...]` for something genuinely blocking even after asking (the user doesn't know either, needs to check something first) — not a substitute for asking in the first place.
 7. Keep terminology, design tokens (from `3-design-system.md`), and component naming consistent across all 8 documents.
 8. Write each completed document directly to `project-docs/claude-docs/drafts/4-ui/<template-filename>`, creating folders as needed. Never modify `project-docs/docs-templates/`.
 
@@ -55,7 +55,8 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 - [ ] `3-design-system.md` followed `design-source.md`'s resolved source before falling back to defaults
 - [ ] All content traceable to SoT, an approved document, or a labeled assumption
 - [ ] Open `[NEEDS INPUT]` markers collected and listed for the user
+- [ ] No `[Assumption: ...]` was written without first asking the user and getting an explicit "use your judgment" response
 - [ ] Terminology and design tokens consistent across all 8 documents
 
 ## Next Step
-`4-ui/` drafts are complete. Run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `4-ui` next — nothing here is promoted into `approved-docs/docs-kit/` until it does. Once `4-ui/` is approved (and `3-api/` is also approved), `6-development/`'s early wave can start in parallel and `5-modules/` can begin — run `project-docs/prompts/3-document-generate/06-development/development.md` (early wave) and/or `project-docs/prompts/3-document-generate/05-modules/modules.md` (one module per run).
+`4-ui/` drafts are complete. Run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `4-ui` next — nothing here is promoted into `approved-docs/docs-kit/` until it does. Once `4-ui/` is approved, `6-development/`'s early wave can start in parallel if it hasn't already — run `project-docs/prompts/3-document-generate/06-development/development.md` (early wave). `5-modules/modules.md` does **not** start here — under the just-in-time model, it's triggered per module by `project-docs/prompts/7-sprint-planning/1-sprint-planning.md` step 2a, once `01-project`, `02-database`, `03-api`, and `04-ui` are all approved.

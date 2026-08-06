@@ -1,6 +1,6 @@
 # Generate: All Database Documents (2-database, batch)
 
-**Prompt version:** 1.1
+**Prompt version:** 1.2
 
 ## Role
 You are a technical writer / architect generating the full `2-database/` documentation set — all 4 documents — at professional quality, using the project's own templates as the required structure.
@@ -32,7 +32,7 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 2. For each document: read its template fully first — headings/structure are the contract, do not restructure. Read the earlier documents this batch has already drafted in `project-docs/claude-docs/drafts/2-database/` that it depends on (per the order above), plus any approved dependency from another category in `project-docs/approved-docs/docs-kit/`, before writing it.
 3. **Database engine and any tooling are project-specific, not fixed by any template.** Every template's own placeholder engine name (e.g. "PostgreSQL") and any engine-specific defaults shown (UUID vs auto-increment primary keys, constraint-enforcement caveats, index/backup syntax, migration-tool syntax) are illustrative example content only. Always use the engine actually decided in `1-project/4-tech-stack.md`, and adapt every engine-specific detail across all 4 documents to that engine — consistently, not just within one document. If `4-tech-stack.md` doesn't name a framework migration tool, `3-migration-strategy.md` must describe a custom versioned-script approach instead of assuming one exists.
 4. Every requirement, rule, or design decision must trace back to a SoT source or a recorded decision/assumption — cite inline, e.g. `[Source: project-docs/sot-docs/raw/brd.md §6]` or `[Assumption: gap-analysis N2]`.
-5. Where detail is insufficient, either draw a reasonable assumption clearly labeled `[Assumption: ...]`, or leave a `[NEEDS INPUT: ...]` marker — never invent unlabeled content.
+5. **Never silently assume.** Where detail is insufficient, note it as an open question while drafting — don't write a guessed value into the document yet. Once this document is otherwise fully drafted, stop and ask the user every open question for it together, in one plain-language round (not as separate interruptions per question). Only write the final content after the user answers: use their real answer if given; if they explicitly say to use your own judgment, write `[Assumption: ...]` — a deferred call the user actually approved, not a silent guess. Reserve `[NEEDS INPUT: ...]` for something genuinely blocking even after asking (the user doesn't know either, needs to check something first) — not a substitute for asking in the first place.
 6. Write each completed document directly to `project-docs/claude-docs/drafts/2-database/<template-filename>`, creating folders as needed. Never modify `project-docs/docs-templates/`.
 7. Keep terminology, the database engine, and the primary key strategy consistent across all 4 documents in this batch.
 
@@ -52,6 +52,7 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 - [ ] Migration tooling in `3-migration-strategy.md` matches what `4-tech-stack.md` actually specifies
 - [ ] All content traceable to SoT, an approved document, or a labeled assumption
 - [ ] Open `[NEEDS INPUT]` markers collected and listed for the user
+- [ ] No `[Assumption: ...]` was written without first asking the user and getting an explicit "use your judgment" response
 - [ ] Terminology consistent across all 4 documents
 
 ## Next Step

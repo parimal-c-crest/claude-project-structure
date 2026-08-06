@@ -14,7 +14,7 @@ A clean, project-agnostic copy of `project-docs/` — no project-specific conten
 ## What's included
 
 - `docs-templates/` — the fixed, seven-category blueprint library. Read-only, never edit.
-- `prompts/` — the full phase-numbered prompt library (`1-discovery/` through `11-dashboard/`), refined across several rounds of real-world use — including `9-sync-docs/2-module-completion-review.md`, added after design-drift, cross-module data-flow, and doc-vs-code gaps were found slipping past every per-task check and only caught by later ad hoc review. Since v7, `3-document-generate/` is one batch prompt per category (all of a category's documents in one run), not one prompt per document.
+- `prompts/` — the full phase-numbered prompt library (`1-discovery/` through `12-maintenance/`), refined across several rounds of real-world use — including `9-sync-docs/2-module-completion-review.md`, added after design-drift, cross-module data-flow, and doc-vs-code gaps were found slipping past every per-task check and only caught by later ad hoc review. Since v7, `3-document-generate/` is one batch prompt per category (all of a category's documents in one run), not one prompt per document. Since v8, module-specific documentation (`5-modules/`, `6-development/`'s late wave) generates just-in-time per module instead of all upfront — see "How the workflow flows" below.
 - `approved-docs/`, `claude-docs/`, `sot-docs/` — empty scaffolds, ready for a new project's actual content.
 
 ## What's not included
@@ -22,9 +22,140 @@ A clean, project-agnostic copy of `project-docs/` — no project-specific conten
 - No project-specific business content anywhere — verified clean.
 - No root-level `CLAUDE.md`/`README.md`/`CHANGELOG.md` — those get created fresh by `1-project-setup.md` for whatever new project this becomes.
 
+## How the workflow flows
+
+```mermaid
+flowchart TD
+    A["1-discovery/\nsetup, SoT, analysis, gap-analysis"] --> B["2-document-plan/\ndocumentation-plan.md"]
+    B --> C["3-document-generate/ (upfront)\n1-project, 2-database, 3-api, 4-ui,\n6-development EARLY wave"]
+    C --> D["4-document-review/1-document-review.md\n(per category)"]
+    D --> E["5-update-sot/1-update-sot.md\n(cycle 1: upfront categories)"]
+    E --> F["6-implementation-plan/1-implementation-plan.md\nMilestones + Epics created.\nModule epics: task list = TBD"]
+
+    F --> G["7-sprint-planning/1-sprint-planning.md"]
+
+    subgraph JIT["step 2a — just-in-time module gate\n(only if this module's docs don't exist yet)"]
+        direction TB
+        J1["3-document-generate/05-modules/modules.md\n(scoped: 1 module)"] --> J2["4-document-review/1-document-review.md\n(scoped: 1 module)"]
+        J2 --> J3["06-development/development.md\nLATE wave (scoped: 1 module)"]
+        J3 --> J4["4-document-review/1-document-review.md\n(scoped: late-wave slice)"]
+        J4 --> J5["5-update-sot/1-update-sot.md\n(cycle: this module)"]
+        J5 --> J6["6-implementation-plan/1-implementation-plan.md\n(scoped: this module's epic\nreal tasks derived)"]
+    end
+
+    G -->|module undocumented| JIT
+    JIT --> G
+    G -->|module already documented| H
+
+    G --> H["7-sprint-planning/3-generate-sprint-page.md\nsprint-{n}.html (mandatory, every sprint)"]
+
+    H --> I["8-implementation/1-implement-task.md"]
+
+    I -->|"UI Design task\n(module's first touch)"| U1["Build static/mock pages,\nfull working navigation"]
+    U1 --> U2["USER: open in real browser,\nclick through List/Detail/Add/Edit"]
+    U2 -->|changes requested| U1
+    U2 -->|approved| G
+
+    I -->|"Backend/API task"| K["8-implementation/2-code-review.md"]
+    K --> L["8-implementation/3-generate-tests.md"]
+    L --> M["9-sync-docs/1-sync-docs.md"]
+    M -->|more tasks in sprint| I
+    M -->|epic's tasks all Done| N["9-sync-docs/2-module-completion-review.md\ndesign fidelity, data-flow, docs-vs-code"]
+
+    N --> O["USER: real backend, live browser,\nfull functional pass"]
+    O -->|issue found| P["fix, re-check"]
+    P --> O
+    O -->|confirmed working| Q["Epic marked Complete"]
+
+    Q -->|last module done| R["3-document-generate/07-cross-cutting/\ncross-cutting.md"]
+    R --> S["4-document-review + 5-update-sot\n(final cycle)"]
+    Q -->|more modules / sprints left| G
+
+    Q -->|sprint's tasks all Done| T["7-sprint-planning/2-retrospective.md"]
+    T --> G
+
+    Q -->|milestone's epics all Complete| REL["10-release/1-release.md"]
+```
+
+**Reading it:** the top half (upfront) generates the shared foundation every module needs — project overview, database, API, UI standards, dev environment — once, before implementation starts. From `7-sprint-planning/` onward, the loop repeats per sprint: any module touched for the first time gets its own 11 documents generated right then (the JIT gate), a brand-new module's UI gets built with static data and approved by the developer in a real browser before backend work starts, and a module's backend can't be marked done until the user has actually clicked through the real, working feature themselves. `07-cross-cutting/` — the one category that needs the full picture — waits for every module to finish this cycle before it runs, once, at the end.
+
+## Data flow (DFD)
+
+Same workflow, viewed as data moving between the developer, Claude's generation/review steps, and the files that persist state — stadium shapes are external entities, rounded boxes are processes, cylinders are data stores (folders/files on disk).
+
+```mermaid
+flowchart LR
+    DEV(["Developer /\nUser"])
+
+    T1[("docs-templates/\n(read-only blueprints)")]
+    D2[("claude-docs/drafts/")]
+    D3[("approved-docs/\ndocs-kit/")]
+    D4[("sot-docs/\nindex + raw")]
+    D5[("claude-docs/plan/\nmilestones, epics,\ntask-list, dependencies")]
+    D6[("claude-docs/sprints/\nsprint-{n}.md + .html")]
+    D7[("claude-docs/gap-analysis/\nreview-log, decisions-log")]
+    CODE[("application\nsource code")]
+
+    P1("Doc generation\n3-document-generate/")
+    P2("Doc review\n4-document-review/")
+    P3("SoT update\n5-update-sot/")
+    P4("Implementation planning\n6-implementation-plan/")
+    P5("Sprint planning\n+ JIT module gate\n7-sprint-planning/")
+    P6("Implementation\n8-implementation/")
+    P7("Sync docs +\nmodule completion review\n9-sync-docs/")
+
+    DEV -- "raw material,\nanswers to gaps" --> P1
+    T1 -- "template structure" --> P1
+    P1 -- "drafts" --> D2
+    D2 -- "drafts to review" --> P2
+    DEV -- "review decisions" --> P2
+    P2 -- "approved docs" --> D3
+    P2 -- "verdicts" --> D7
+
+    D3 -- "newly approved" --> P3
+    P3 -- "authoritative index" --> D4
+    D4 -- "current SoT" --> P1
+
+    D3 -- "docs-kit" --> P4
+    P4 -- "milestones/epics/tasks\n(module tasks = TBD)" --> D5
+
+    D5 -- "candidate epics" --> P5
+    D3 -- "which modules\nalready documented" --> P5
+    P5 -- "JIT trigger: undocumented\nmodule's epic selected" --> P1
+    P5 -- "sprint file" --> D6
+
+    D6 -- "this sprint's tasks" --> P6
+    DEV -- "live-browser approval\n(static pages)" --> P6
+    P6 -- "working code" --> CODE
+    P6 -- "status updates" --> D5
+
+    P6 -- "completed task" --> P7
+    P7 -- "doc fixes" --> D3
+    CODE -- "what was actually built" --> P7
+    P7 -- "design-fidelity,\ndata-flow, docs-vs-code" --> DEV
+    DEV -- "live-browser\nfunctional confirmation" --> P7
+    P7 -- "epic Complete" --> D5
+```
+
+**Reading it:** Claude never writes application code or docs from thin air — every process reads from a store (templates, drafts, docs-kit, SoT, plan) and writes back to one, and the developer is the only external entity, sitting at both ends of two loops: approving documents before they're promoted, and approving working software (static pages, then real functionality) before a module counts as done. The one flow that makes this template's v8 change visible here is `P5 → P1` — sprint planning feeding back into document generation, module by module, instead of generation only ever flowing forward.
+
 ## Keeping this template current
 
 If you improve `prompts/` or `docs-templates/` on a real project later (the same way earlier findings got folded back into `9-sync-docs/`, `6-implementation-plan/`, and `10-release/`), copy the fixed files back into this template's copies so future projects benefit too — this folder doesn't auto-update.
+
+## v8 changes (over v7.7) — just-in-time module documentation
+
+Every prior version generated all documentation upfront, including all 11 documents for every module in `5-modules/`, before implementation planning even began. On a project with many modules this front-loaded a lot of writing for modules that wouldn't be built for months. v8 defers module-specific work to the moment it's actually needed, and closes the loop with a required human check at both ends of a module's build.
+
+- **`5-modules/modules.md` and `06-development/development.md`'s late wave are no longer part of the upfront documentation batch.** They're now triggered by a new step 2a in `7-sprint-planning/1-sprint-planning.md`, the first time a module's `<Module> — UI Design` or `<Module> — Backend/API` epic is a candidate for an upcoming sprint. The late wave is now scoped and updated per module (folding each module's structure into the same four documents) instead of waiting for every module to finish. `07-cross-cutting/cross-cutting.md` still runs last, always — but under this model that means after the *last* module's JIT cycle, not right after the other upfront categories.
+- **`6-implementation-plan/1-implementation-plan.md`** (bumped to 1.4) — its initial run derives module epics from `module-list.md` alone (not `docs-kit/5-modules/`, which doesn't exist yet) and leaves each module epic's task list empty/TBD. A new "Re-run scoped to a single module" mode fills in that task list once the JIT gate above generates the module's real documentation. Epic `Complete` now also requires the new user browser acceptance check (see below), not just automated checks passing.
+- **New `7-sprint-planning/3-generate-sprint-page.md`** — generates a self-contained `sprint-{{n}}.html` status page after every sprint is planned. Unlike `11-dashboard/1-generate-dashboard.md` (on-demand), this one is mandatory, run every sprint right after `1-sprint-planning.md`.
+- **Static UI pages must be fully navigable, not isolated mockups.** `8-implementation/1-implement-task.md`'s Module Design-First Strategy now requires real, working inter-page navigation (List → Detail → Add/Edit → back) against a shared mock dataset — only the backend/API call is stubbed, not the routing. The developer's review of these pages now means opening them on a real local dev server and clicking through, not approving off a text description.
+- **New required user browser acceptance check before a module (backend) can be marked `Complete`.** `9-sync-docs/2-module-completion-review.md` (bumped to 1.1) adds a closing step: once its own automated checks (design fidelity, data-flow trace, docs-vs-code) pass, the user manually exercises the module's real functionality in a browser against the real backend, and anything they report wrong gets fixed and re-checked until they explicitly confirm it works. This confirmation is now a separate, required condition for Epic `Complete`, alongside — not replacing — Claude's own checks.
+- **`5-update-sot/1-update-sot.md`** (bumped to 1.1) — now runs multiple times per project (after the upfront categories, after each module's JIT cycle, and once more after the final `07-cross-cutting/` sweep) instead of once; its Next Step branches on which cycle just finished.
+- **`prompts/README.md`** — new "Just-in-time module documentation" section, folder tree, phase table, and "Determining next" all rewritten for the JIT flow; new flow diagram added (see below).
+- **`prompts/GLOSSARY.md`** — two new terms: *Just-in-time (JIT) module documentation*, *User browser acceptance*. The existing *Wave* definition updated to describe the late wave's new per-module trigger.
+- Fixed a filename-numbering collision the new sprint-page prompt would otherwise have created against the existing `7-sprint-planning/2-retrospective.md` — the new file is `3-generate-sprint-page.md`, per this template's own "append at the end of the category" numbering-insertion policy (see v4 above), not a renumber of the existing file.
 
 ## v3 changes (over v2)
 

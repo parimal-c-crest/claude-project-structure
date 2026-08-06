@@ -1,6 +1,6 @@
 # Module Completion Review
 
-**Prompt version:** 1.0
+**Prompt version:** 1.1
 
 ## Role
 You are a QA/design lead running the closing gate on a module before its epic can be marked `Complete` — the check that catches what per-task unit/integration tests structurally cannot.
@@ -43,9 +43,15 @@ For one epic (module) whose tasks are all `Done`, verify: (1) the built UI match
 7. Read every claim in this module's `docs-kit/5-modules/<module>/` documents (schema fields, endpoints, business rules, permissions, UI elements) and confirm each one is backed by real code, not just a plan that was never executed.
 8. Flag anything documented but never built. Small items: fix now. Anything sizable (e.g. a whole missing audit trail): don't silently bolt it onto this review — log it explicitly as a known gap with a recommendation for a dedicated task, the same way the `activity_log` gap was handled.
 
+### 4. User browser acceptance — required before this epic can be marked Complete
+9. Once checks 1–3 above pass clean (or all found gaps are fixed/logged), start the module's local dev server with its **real** backend wired up — not mock data — and hand off to the user for a manual functional pass: create, edit, list, and delete real records through the actual UI, exactly as an end user would.
+10. This is a live-browser check by the user, not a description or summary from Claude — same expectation as the Module Design-First Strategy's static-page review (`8-implementation/1-implement-task.md` step 3–4), but now testing real behavior (data actually persists, list/detail/edit reflect real state, validation errors are real, not shortcuts a mock could paper over).
+11. **If the user reports anything wrong, fix it and ask them to re-check.** Repeat until the user explicitly confirms the module works from their perspective — there's no fixed number of rounds, same as the design-review loop earlier in this module's life.
+12. Record the user's confirmation (date, one line) in the `review-log.md` entry from Output below — this confirmation is what step 9's "Next Step" gate checks for, not just Claude's own checks passing.
+
 ## Output
 - Fixes for every genuine (category-a) gap found, each with the same rigor as a normal task: code fix, all four checks (lint/typecheck/test/build) on both packages, an E2E pass covering the fix.
-- A dated section appended to `project-docs/claude-docs/gap-analysis/review-log.md` covering all three checks for this module (design fidelity, data-flow trace, docs-vs-code), even if nothing was found — a clean pass is worth recording too, so this module isn't re-audited from scratch next time.
+- A dated section appended to `project-docs/claude-docs/gap-analysis/review-log.md` covering all four checks for this module (design fidelity, data-flow trace, docs-vs-code, and the user's live-browser functional confirmation), even if nothing was found — a clean pass is worth recording too, so this module isn't re-audited from scratch next time.
 - `project-docs/claude-docs/plan/task-list.md`'s relevant task note(s) updated per the established pattern.
 - Any sizable, deliberately-deferred gap logged with a recommendation, not silently fixed or silently dropped.
 
@@ -54,6 +60,7 @@ For one epic (module) whose tasks are all `Done`, verify: (1) the built UI match
 - A live reference deployment (if one exists) is a second, richer comparison source than static screenshots — it can show interaction-only states a page-load screenshot cannot. Use both; don't skip the live check just because the static screenshot already matched.
 - Don't let this review turn into a redesign — only fix what the design source or this module's own approved docs actually called for.
 - This review runs once per epic, after all its tasks are `Done`, before the epic can be marked `Complete` in `epics.md` — not per-task, and not skippable "because the module already looked fine in the screenshots reviewed for an earlier module."
+- **Never mark this epic `Complete` on checks 1–3 passing alone.** The user's live-browser functional confirmation (check 4) is a required, separate condition — per `6-implementation-plan/1-implementation-plan.md`'s Status Tracking rule, an automated-clean pass with no recorded user confirmation is not yet `Complete`.
 
 ## Completion Checklist
 - [ ] Automated accessibility check run against this module's built screens, violations fixed or explicitly logged
@@ -62,8 +69,10 @@ For one epic (module) whose tasks are all `Done`, verify: (1) the built UI match
 - [ ] Every upstream/downstream data-flow link for this module traced live, not just assumed from green per-module tests
 - [ ] Every claim in this module's `docs-kit` documents confirmed backed by real code
 - [ ] All fixes pass lint/typecheck/test/build on both packages plus a real E2E pass
-- [ ] Dated review-log.md entry written (even if no gaps found)
+- [ ] Local dev server started with the real backend, handed to the user for a live functional pass
+- [ ] User explicitly confirmed the module works from their perspective, after any reported issues were fixed and re-checked
+- [ ] Dated review-log.md entry written, including the user's confirmation (even if no gaps found)
 - [ ] task-list.md task note(s) updated
 
 ## Next Step
-Once this passes clean (or all found gaps are fixed/logged), the epic can be marked `Complete` in `epics.md`. Return to `project-docs/prompts/7-sprint-planning/1-sprint-planning.md` — once every epic in the active milestone is `Complete`, it will tell you to run `project-docs/prompts/10-release/1-release.md`.
+Once checks 1–3 pass clean (or all found gaps are fixed/logged) **and** the user has explicitly confirmed the module's real functionality in their browser (check 4), the epic can be marked `Complete` in `epics.md`. Return to `project-docs/prompts/7-sprint-planning/1-sprint-planning.md` — it picks the next module's epic next (triggering that module's own just-in-time documentation gate, step 2a, if it hasn't been touched yet), or, once every epic in the active milestone is `Complete`, tells you to run `project-docs/prompts/10-release/1-release.md`.
