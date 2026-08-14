@@ -1,6 +1,6 @@
 # Generate: Module Field & Rule Extraction (05-modules, pre-step)
 
-**Prompt version:** 1.0
+**Prompt version:** 1.1
 
 ## Role
 You are a data/business analyst producing an exhaustive, field-by-field and rule-by-rule fact
@@ -37,6 +37,14 @@ Once this step's output exists and any Blocking gaps it raised are resolved, con
 
 State which origin applies at the top of both output documents. A project can mix origins across
 modules; never assume one for the whole project.
+
+## Depth — default is full coverage
+Default to full, exhaustive coverage (every field, every rule) unless a coordinating process
+states a sampling budget or scope limit **before this step starts**. If a scope/depth change
+arrives *after* this step is already underway on a given document, finish that document at its
+current depth rather than stopping mid-extraction to re-scope — an in-progress exhaustive pass
+that gets cut short produces a document that looks complete but silently isn't, which is worse
+than finishing it. See the matching guardrail below.
 
 ## Prerequisites — stop and report if missing
 - `project-docs/claude-docs/analysis/module-list.md`
@@ -107,6 +115,14 @@ modules; never assume one for the whole project.
    items carry forward as open questions into the generated docs.
 7. Cross-check against `decisions-log.md` — never let this module's rules restate or re-decide a
    cross-cutting decision (shared enum values, role scope, ID conventions) already locked there.
+8. **End every output document (entities-and-fields.md, business-rules.md, workflow.md) with a
+   Coverage Statement** — the specific files, folders, or SoT sections actually read for this
+   document, and, just as importantly, what was deliberately NOT read (a large file only
+   partially opened, a related file skipped as out of scope, a called function whose body wasn't
+   traced). This is not the same as the Open Questions list — Open Questions covers things you
+   read but couldn't resolve; the Coverage Statement covers what you didn't attempt to read at
+   all, so a later reader can tell the difference between "checked and unclear" and "never
+   checked."
 
 ## Output
 - `project-docs/claude-docs/analysis/module-field-extraction/<module-slug>/entities-and-fields.md`
@@ -130,6 +146,12 @@ modules.md` reads them as required input when drafting `3-business-rules.md`, `4
   general domain convention when the source is silent; that's still a gap, tag it.
 - Don't proceed to `05-modules/modules.md` step 1 until this module's Blocking open questions are
   resolved with the user.
+- If a scope-narrowing or depth-reduction instruction arrives while a document is already
+  substantially drafted, don't discard the completed work to redo it smaller — finish and keep
+  what's done, and note in the Coverage Statement that the instruction arrived late. Apply a new
+  depth instruction only to work that hasn't started yet.
+- Don't skip the Coverage Statement — an extraction document without one can't be told apart from
+  one that quietly covered less than it claims to.
 
 ## Completion Checklist
 - [ ] Every field individually listed (no grouping), with logical type, required/default,
@@ -143,6 +165,7 @@ modules.md` reads them as required input when drafting `3-business-rules.md`, `4
 - [ ] Open Questions list has a Blocking/Non-blocking flag on every item
 - [ ] Blocking items presented to and resolved with the user
 - [ ] Nothing here restates or re-decides an entry already in `decisions-log.md`
+- [ ] Every output document ends with a Coverage Statement (what was read, what deliberately wasn't)
 
 ## Next Step
 Once this module's field-extraction documents exist and Blocking open questions are resolved,

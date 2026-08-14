@@ -1,6 +1,6 @@
 # Documentation Planning
 
-**Prompt version:** 1.4
+**Prompt version:** 1.5
 
 ## Role
 You are a documentation lead deciding what needs to be written, in what order, before generation starts.
@@ -32,6 +32,15 @@ This folder already exists with seven category folders, each holding a `README.m
 
    **`5-modules/` and `6-development/`'s late wave are deferred, not part of this upfront order.** List every module from `module-list.md` in the plan (per step 3) so the full scope is visible, but mark each module's 11-document set and its corresponding late-wave slice as **"deferred — triggered per-module by `7-sprint-planning/1-sprint-planning.md` step 2a"** rather than giving them a place in the upfront generation sequence. A module's documentation only gets generated once its `<Module> — UI Design` or `<Module> — Backend/API` epic is first selected into a sprint — not during this initial documentation-generation pass. This keeps the upfront batch limited to `1-project`, `2-database`, `3-api`, `4-ui`, `6-development` (early wave), and `7-cross-cutting` — the shared foundation every module needs — while module-specific documentation spreads out across the project's actual build timeline instead of front-loading all of it before any module is touched.
 5. **Explicitly mark, for every document in the plan, whether it can run in parallel with others or must wait** — don't leave this implicit in the numbering. A document plan entry should read like "`3-api/2-authentication.md` — parallel with `2-database/*`, `4-ui/*`; sequential after `1-project/*`," not just a flat ordered list. This matters even for a solo session (it tells you what order is actually safe to reshuffle if priorities change) and matters more if multiple sessions ever generate concurrently.
+
+   **Why `2-database`/`3-api`/`4-ui`/`6-development`-early-wave are actually safe to parallelize**:
+   each of these categories' generation prompts is instructed to ground its content in
+   `decisions-log.md` and the upfront SoT/analysis — never in another upfront category's own
+   drafted output. That's what makes running them concurrently safe (no category is reading
+   another's in-progress draft). If a future template change ever makes one of these categories
+   need to read another one's *content* directly (not just the shared decisions log), that pair
+   stops being parallel-safe and this plan must mark it sequential — don't assume the parallel
+   grouping above stays valid if that assumption changes.
 
 ## Output
 - `project-docs/claude-docs/plan/documentation-plan.md` — every target document as `<category>/[<module-slug>/]<template-filename>`, with its dependencies and generation order, ready to drive repeated runs of `3-document-generate/`.

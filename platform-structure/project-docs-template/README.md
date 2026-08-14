@@ -147,6 +147,26 @@ If you improve `prompts/` or `docs-templates/` on a real project later (the same
 
 **Note on `Prompt version` lines vs. this changelog:** the changelog below records the *notable* changes behind each version bump, not every bump — a file's on-disk `**Prompt version:**` line can be ahead of the highest version this changelog mentions for it (a later, undocumented touch-up). The changelog entry is still accurate for what it describes; it just isn't a complete version history. Treat the file's own header line as the source of truth for "what version is this," and this changelog as "why did notable versions change," not a 1:1 log of every bump.
 
+## v9.1 changes (over v9) — fixes found by actually running v9's field-extraction on a real module
+
+Found while running `0-field-extraction.md` for real, for the first time, against a live legacy
+codebase (an actual pilot run, not a dry read of the prompt). Three sub-agents ran in parallel
+(entities, rules, workflow); two had already finished full-depth work before a scope-narrowing
+instruction arrived mid-run, and both independently made the same reasonable call (keep the
+finished work, don't discard it) — which is the right call, but it was judgment, not something
+the prompt actually said to do.
+
+- **`0-field-extraction.md`** (bumped to 1.1) — new "Depth" section stating full coverage is the
+  default and that an in-progress document should finish at its current depth rather than being
+  cut short by a late-arriving scope change; new required **Coverage Statement** at the end of
+  every output document (what was read, what deliberately wasn't — distinct from Open Questions,
+  which covers what was read but couldn't be resolved); two new Guardrails and a Completion
+  Checklist item for both.
+- **`2-document-plan/1-documentation-plan.md`** (bumped to 1.5) — the existing "these categories
+  can run in parallel" rule now states *why* it's safe (each category grounds in `decisions-log.md`
+  only, never another category's in-progress draft) and flags that the grouping stops being valid
+  if a future template change makes one category need to read another's content directly.
+
 ## v9 changes (over v8) — module field & rule extraction, closing the completeness gap
 
 v8's JIT module gate still drafted a module's 11 documents (`3-business-rules.md`, `4-schema.md`,
