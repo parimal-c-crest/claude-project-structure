@@ -14,7 +14,7 @@ A clean, project-agnostic copy of `project-docs/` — no project-specific conten
 ## What's included
 
 - `docs-templates/` — the fixed, seven-category blueprint library. Read-only, never edit.
-- `prompts/` — the full phase-numbered prompt library (`1-discovery/` through `12-maintenance/`), refined across several rounds of real-world use — including `9-sync-docs/2-module-completion-review.md`, added after design-drift, cross-module data-flow, and doc-vs-code gaps were found slipping past every per-task check and only caught by later ad hoc review. Since v7, `3-document-generate/` is one batch prompt per category (all of a category's documents in one run), not one prompt per document. Since v8, module-specific documentation (`5-modules/`, `6-development/`'s late wave) generates just-in-time per module instead of all upfront — see "How the workflow flows" below.
+- `prompts/` — the full phase-numbered prompt library (`1-discovery/` through `12-maintenance/`), refined across several rounds of real-world use — including `9-sync-docs/2-module-completion-review.md`, added after design-drift, cross-module data-flow, and doc-vs-code gaps were found slipping past every per-task check and only caught by later ad hoc review. Since v7, `3-document-generate/` is one batch prompt per category (all of a category's documents in one run), not one prompt per document. Since v8, module-specific documentation (`5-modules/`, `6-development/`'s late wave) generates just-in-time per module instead of all upfront — see "How the workflow flows" below. Since v9, each module's JIT gate starts with an exhaustive field-and-rule extraction pass (`05-modules/0-field-extraction.md`) before any of its 11 documents are drafted, closing the gap where a module's schema/business-rules/data-dictionary/validation docs could otherwise be generated straight from a necessarily-incomplete BRD.
 - `approved-docs/`, `claude-docs/`, `sot-docs/` — empty scaffolds, ready for a new project's actual content.
 - `tools/validate-template.mjs` — a zero-dependency Node script that checks `prompts/` for broken cross-references, missing `**Prompt version:**` lines, and document-count drift against `docs-templates/`. Run it (`node tools/validate-template.mjs`) after editing anything under `prompts/` or `docs-templates/` — catches the kind of dead "Next Step" link that v7.6 above only found via a full manual read-through, mechanically instead of by hand. See the maintenance comment at the top of the script itself for when it needs updating vs. when it doesn't.
 
@@ -28,7 +28,7 @@ A clean, project-agnostic copy of `project-docs/` — no project-specific conten
 ```mermaid
 flowchart TD
     A["1-discovery/\nsetup, SoT, analysis, gap-analysis"] --> B["2-document-plan/\ndocumentation-plan.md"]
-    B --> C["3-document-generate/ (upfront)\n1-project, 2-database, 3-api, 4-ui,\n6-development EARLY wave"]
+    B --> C["3-document-generate/ (upfront)\n01-project, 02-database, 03-api, 04-ui,\n06-development EARLY wave"]
     C --> D["4-document-review/1-document-review.md\n(per category)"]
     D --> E["5-update-sot/1-update-sot.md\n(cycle 1: upfront categories)"]
     E --> F["6-implementation-plan/1-implementation-plan.md\nMilestones + Epics created.\nModule epics: task list = TBD"]
@@ -37,7 +37,8 @@ flowchart TD
 
     subgraph JIT["step 2a — just-in-time module gate\n(only if this module's docs don't exist yet)"]
         direction TB
-        J1["3-document-generate/05-modules/modules.md\n(scoped: 1 module)"] --> J2["4-document-review/1-document-review.md\n(scoped: 1 module)"]
+        J0["05-modules/0-field-extraction.md\n(scoped: 1 module, field+rule catalog)"] --> J1["3-document-generate/05-modules/modules.md\n(scoped: 1 module)"]
+        J1 --> J2["4-document-review/1-document-review.md\n(scoped: 1 module)"]
         J2 --> J3["06-development/development.md\nLATE wave (scoped: 1 module)"]
         J3 --> J4["4-document-review/1-document-review.md\n(scoped: late-wave slice)"]
         J4 --> J5["5-update-sot/1-update-sot.md\n(cycle: this module)"]
@@ -144,6 +145,46 @@ flowchart LR
 
 If you improve `prompts/` or `docs-templates/` on a real project later (the same way earlier findings got folded back into `9-sync-docs/`, `6-implementation-plan/`, and `10-release/`), copy the fixed files back into this template's copies so future projects benefit too — this folder doesn't auto-update.
 
+**Note on `Prompt version` lines vs. this changelog:** the changelog below records the *notable* changes behind each version bump, not every bump — a file's on-disk `**Prompt version:**` line can be ahead of the highest version this changelog mentions for it (a later, undocumented touch-up). The changelog entry is still accurate for what it describes; it just isn't a complete version history. Treat the file's own header line as the source of truth for "what version is this," and this changelog as "why did notable versions change," not a 1:1 log of every bump.
+
+## v9 changes (over v8) — module field & rule extraction, closing the completeness gap
+
+v8's JIT module gate still drafted a module's 11 documents (`3-business-rules.md`, `4-schema.md`,
+`5-data-dictionary.md`, `6-validation.md` included) straight from the SoT plus summary-level
+analysis (`business-rules-summary.md` is a bullet list, not a field catalog), catching gaps
+reactively via `[NEEDS INPUT]`/`[Assumption]` as each document was drafted. That prevents silent
+hallucination but never guaranteed exhaustiveness — a BRD rarely enumerates every entity field or
+every rule precisely, and a reactive per-document pass can miss a field it never thought to ask
+about, not just one it noticed and flagged. Found while piloting this template's method against a
+real system being replaced (a full field-by-field, rule-by-rule extraction pass run directly
+against that system's actual source code and live database, independent of any BRD), where the
+gap between "summary-level analysis" and "exhaustive field catalog" became concrete and visible
+for the first time.
+
+- **New `3-document-generate/05-modules/0-field-extraction.md`** — runs as step 0 of a module's
+  JIT gate, before any of its 11 documents are drafted. Produces an exhaustive, individually-listed
+  field catalog and numbered business-rule catalog for the module (never grouped/summarized),
+  each entry tagged `Confirmed` / `Inferred` / `Underspecified` (a new third tier — distinct from
+  `Inferred`, meaning the source shows a field/rule exists but doesn't describe it well enough to
+  fill in confidently, versus `Inferred` meaning it's deduced but not stated). Supports two origins
+  per module: **Extracted-from-existing-system** (real source code + live schema, every fact cited
+  to file:line/query — for a module with a live predecessor) or **Derived-from-SoT-plus-questions**
+  (for a genuinely new module). Cross-checks fields against rules in both directions (every field a
+  rule touches must be cataloged; every cataloged field should be consciously used or noted
+  standalone) and requires concrete enum/lookup value lists rather than "this is an enum."
+- **`5-modules/modules.md`** (bumped to 1.6) — new step 0 and a new Prerequisites/Inputs entry:
+  won't draft `3-business-rules.md`/`4-schema.md`/`5-data-dictionary.md`/`6-validation.md` for a
+  module until that module's field-extraction documents exist with no unresolved Blocking open
+  question. Citation convention extended to allow citing a field-extraction rule ID directly.
+- Field-extraction output lands in a new location — `project-docs/claude-docs/analysis/
+  module-field-extraction/<module-slug>/` — alongside the existing project-wide analysis
+  artifacts, not inside the 11-file module deliverable itself (it's a working fact base the
+  deliverable is generated from, not one of the 11 documents).
+- Open questions raised during extraction carry an explicit **Blocking?** flag (blocks an entire
+  capability vs. a narrow, isolated gap) — the same Blocking/Non-blocking split
+  `1-discovery/6-gap-analysis.md` already used for project-level gaps, now applied at field/rule
+  granularity too.
+
 ## v8 changes (over v7.7) — just-in-time module documentation
 
 Every prior version generated all documentation upfront, including all 11 documents for every module in `5-modules/`, before implementation planning even began. On a project with many modules this front-loaded a lot of writing for modules that wouldn't be built for months. v8 defers module-specific work to the moment it's actually needed, and closes the loop with a required human check at both ends of a module's build.
@@ -178,7 +219,7 @@ Added after a role-based review (Business Analyst through Project Lifecycle Advi
 
 A structural review (numbering fragility, where cross-cutting docs belong, status-model duplication, parallel-track support, small-project scaling) produced these changes:
 
-- **New `7-cross-cutting/` category**, run last. `1-non-functional-requirements.md` (moved out of `1-project/`) and `2-threat-model.md` (moved out of `6-development/`) now live here instead of wherever had a free filename slot — neither is really "what we're building" or "how we build day-to-day," they're a third thing that cross-checks everything else. `01-project/` and `06-development/` are back to their original 4/10-file counts.
+- **New `7-cross-cutting/` category**, run last. `1-non-functional-requirements.md` (moved out of `1-project/`) and `2-threat-model.md` (moved out of `6-development/`) now live here instead of wherever had a free filename slot — neither is really "what we're building" or "how we build day-to-day," they're a third thing that cross-checks everything else. `docs-templates/1-project/` and `docs-templates/6-development/` are back to their original 4/10-file counts.
 - **Numbering-insertion policy documented** in `prompts/README.md`: new documents append at the end of their category, or use letter-suffixed filenames (`4a-name.md`) for genuine mid-sequence inserts — never a full renumber, which breaks every cross-file "Next Step" reference. (This is *only* a policy for future changes — existing files were not renumbered.)
 - **Centralized status-rollup rule.** `8-implementation/1-implement-task.md` and `2-code-review.md` no longer restate the `Complete`/`In Progress`/`Blocked` rollup algorithm — both now point to the single canonical definition in `6-implementation-plan/1-implementation-plan.md`'s "Status Tracking" section.
 - **Parallel-track structure made explicit**, not just a prose aside: `2-document-plan/1-documentation-plan.md` now requires marking every document as parallel-safe or sequential; `prompts/README.md`'s tree/table state directly that `02-database/`, `03-api/`, `04-ui/` (and `06-development/`'s early wave) have no dependency on each other.

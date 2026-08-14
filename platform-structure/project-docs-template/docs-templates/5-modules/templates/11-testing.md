@@ -205,7 +205,7 @@ API
 
 UI
 
-Project Testing Strategy
+[Project Testing Strategy](../../6-development/templates/6-testing-strategy.md)
 
 ---
 

@@ -126,9 +126,9 @@ API
 
 UI
 
-Authentication
+[Authentication](../../3-api/templates/2-authentication.md)
 
-Authorization
+[Authorization](../../3-api/templates/3-authorization.md)
 
 ---
 

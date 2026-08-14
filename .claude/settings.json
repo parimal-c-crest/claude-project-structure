@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -f docs-templates/2-database/templates/3-migration-strategy.md docs-templates/2-database/templates/4-database-standards.md)",
+      "Bash(rm -f docs-templates/3-api/templates/3-authorization.md docs-templates/3-api/templates/4-query-standards.md docs-templates/3-api/templates/5-response-standards.md docs-templates/3-api/templates/7-api-development-standards.md docs-templates/3-api/templates/8-api-versioning.md docs-templates/3-api/templates/9-openapi.yaml docs-templates/3-api/templates/10-postman-collection.json)",
+      "Bash(rm -f docs-templates/4-ui/templates/2-user-flows.md docs-templates/4-ui/templates/4-component-standards.md docs-templates/4-ui/templates/5-form-standards.md docs-templates/4-ui/templates/6-responsive-design.md docs-templates/4-ui/templates/7-accessibility.md docs-templates/4-ui/templates/8-frontend-development-standards.md)",
+      "Bash(rm -f docs-templates/5-modules/templates/3-business-rules.md docs-templates/5-modules/templates/5-data-dictionary.md docs-templates/5-modules/templates/6-validation.md docs-templates/5-modules/templates/7-permissions.md docs-templates/5-modules/templates/10-implementation-plan.md)",
+      "Bash(rm -f docs-templates/6-development/templates/2-folder-structure.md docs-templates/6-development/templates/4-git-workflow.md docs-templates/6-development/templates/7-deployment-strategy.md docs-templates/6-development/templates/8-containerization.md docs-templates/6-development/templates/9-ci-cd.md docs-templates/6-development/templates/10-debugging-guide.md)",
+      "Bash(node tools/validate-template.mjs)",
+      "Bash(mkdir -p \"d:/wamp64_www/claude-project-structure/project-docs-template-lite/docs-templates\" \"d:/wamp64_www/claude-project-structure/project-docs-template-lite/project-docs\")"
+    ],
+    "additionalDirectories": [
+      "d:\\wamp64_www\\claude-project-structure\\project-docs-template-lite"
+    ]
+  }
+}
