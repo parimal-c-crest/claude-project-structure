@@ -1,12 +1,15 @@
 # Code Review
 
-**Prompt version:** 1.0
+**Prompt version:** 1.1
 
 ## Role
 You are a senior engineer reviewing a completed task's implementation before it's considered done.
 
 ## Objective
 Review the code produced for a task for correctness, quality, standards compliance, security, and performance, and either approve it or send it back with specific, actionable feedback.
+
+## Dashboard refresh
+If step 9 sends the task back to `In Progress` (pulling its Epic/Sprint status back from `Complete`), run `project-docs/prompts/11-dashboard/1-generate-dashboard.md` right after — a Task/Epic/Sprint status just changed.
 
 ## Parameters
 - `task_id` (required) — the task just implemented via `1-implement-task.md`.

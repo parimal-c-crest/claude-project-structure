@@ -47,11 +47,8 @@ flowchart TD
 
     G -->|module undocumented| JIT
     JIT --> G
-    G -->|module already documented| H
-
-    G --> H["7-sprint-planning/3-generate-sprint-page.md\nsprint-{n}.html (mandatory, every sprint)"]
-
-    H --> I["8-implementation/1-implement-task.md"]
+    G -->|module already documented| I
+    G --> I["8-implementation/1-implement-task.md"]
 
     I -->|"UI Design task\n(module's first touch)"| U1["Build static/mock pages,\nfull working navigation"]
     U1 --> U2["USER: open in real browser,\nclick through List/Detail/Add/Edit"]
@@ -94,7 +91,7 @@ flowchart LR
     D3[("approved-docs/\ndocs-kit/")]
     D4[("sot-docs/\nindex + raw")]
     D5[("claude-docs/plan/\nmilestones, epics,\ntask-list, dependencies")]
-    D6[("claude-docs/sprints/\nsprint-{n}.md + .html")]
+    D6[("claude-docs/sprints/\nsprint-{n}.md")]
     D7[("claude-docs/gap-analysis/\nreview-log, decisions-log")]
     CODE[("application\nsource code")]
 
@@ -146,6 +143,15 @@ flowchart LR
 If you improve `prompts/` or `docs-templates/` on a real project later (the same way earlier findings got folded back into `9-sync-docs/`, `6-implementation-plan/`, and `10-release/`), copy the fixed files back into this template's copies so future projects benefit too — this folder doesn't auto-update.
 
 **Note on `Prompt version` lines vs. this changelog:** the changelog below records the *notable* changes behind each version bump, not every bump — a file's on-disk `**Prompt version:**` line can be ahead of the highest version this changelog mentions for it (a later, undocumented touch-up). The changelog entry is still accurate for what it describes; it just isn't a complete version history. Treat the file's own header line as the source of truth for "what version is this," and this changelog as "why did notable versions change," not a 1:1 log of every bump.
+
+## v9.2 changes (over v9.1) — dropped per-sprint HTML, dashboard now covers Todos and auto-refreshes on status change
+
+This copy of the template (`full-doc/`) diverges from the `on-demand-module-doc/` variant starting here — the two were identical through v9.1.
+
+- **Removed `7-sprint-planning/3-generate-sprint-page.md`.** The mandatory per-sprint HTML page (added in v8) is gone; `1-sprint-planning.md`'s Next Step now goes straight to `8-implementation/1-implement-task.md`. `11-dashboard/1-generate-dashboard.md` remains the one HTML progress view.
+- **`11-dashboard/1-generate-dashboard.md`** (bumped to 2.3) — the Milestone→Epic→Task breakdown gained a fourth, bottom level: each task, when expanded, now shows its Todo checklist (from `claude-docs/tasks/<task_id>-todos.md`), matching this kit's real `Project → Milestone → Epic → Task → Todo` hierarchy end to end. Still regenerated from scratch every run, never hand-edited.
+- **Dashboard auto-trigger.** Beyond running on demand, the dashboard now regenerates automatically right after any Task/Epic/Sprint/Milestone status change: `8-implementation/1-implement-task.md` (bumped to 1.8), `2-code-review.md` (bumped to 1.1), `9-sync-docs/2-module-completion-review.md` (bumped to 1.4), and `7-sprint-planning/1-sprint-planning.md` (bumped to 1.5) each trigger a regen right after a status change they make. Deliberately **not** triggered per-Todo-checkbox-tick — too frequent, and the top-level tiles/rollups wouldn't visibly change anyway; a task's Todo list on the dashboard is current as of that task's own last status-changing trigger. Full regeneration was kept (not incremental patching) — a single status change cascades into every rollup number on the page (its Epic's %, that Epic's Milestone %, the Sprint bar, the Overall Delivery tile), so there's no single field that can be safely patched in isolation.
+- **`prompts/README.md`, root `README.md`** — folder tree, phase table, flow diagram, and DFD updated to remove the sprint-page node/mentions and describe the dashboard's widened scope and auto-trigger.
 
 ## v9.1 changes (over v9) — fixes found by actually running v9's field-extraction on a real module
 

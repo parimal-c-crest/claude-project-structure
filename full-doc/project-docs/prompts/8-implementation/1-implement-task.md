@@ -1,6 +1,6 @@
 # Implementation
 
-**Prompt version:** 1.7
+**Prompt version:** 1.8
 
 ## Role
 You are a software engineer implementing one task from the current sprint.
@@ -10,6 +10,9 @@ You are a software engineer implementing one task from the current sprint.
 
 ## Objective
 Implement exactly one task from `project-docs/claude-docs/sprints/sprint-{{n}}.md`, correctly and to the project's standards, and nothing more.
+
+## Dashboard refresh
+Whenever this prompt changes a Task, Epic, or Sprint status (claiming a task in step 1, cancelling one in step 2, or completing/blocking one in step 9), run `project-docs/prompts/11-dashboard/1-generate-dashboard.md` right after — so the dashboard stays current without the developer remembering to regenerate it. This does not apply to Todo checkbox ticks within step 5 — those don't trigger a regen on their own; the dashboard shows the Todo checklist as of the task's own last status-changing trigger.
 
 ## Module Design-First Strategy (default under Milestone 2/3+ structure; ask-once opt-in otherwise)
 
