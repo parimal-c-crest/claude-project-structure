@@ -1,0 +1,33 @@
+#!/bin/sh
+# Runs tools/validate-template.mjs against any docs-first framework variant
+# (full-doc/, on-demand-module-doc/) whose prompts/ or docs-templates/ files
+# are staged in this commit. Blocks the commit if validation fails.
+#
+# Activation (one-time per clone, not automatic — .git/hooks isn't tracked):
+#   git config core.hooksPath .githooks
+#
+# See full-doc/project-docs/README.md's changelog (v9.6) for why this exists.
+
+set -e
+
+staged_files=$(git diff --cached --name-only --diff-filter=ACMR)
+
+check_variant() {
+	variant_path="$1"
+	pattern="^${variant_path}/project-docs/(prompts|docs-templates)/"
+
+	if echo "$staged_files" | grep -Eq "$pattern"; then
+		echo "pre-commit: ${variant_path}/project-docs/ prompts or templates changed — running validate-template.mjs"
+		if ! (cd "${variant_path}/project-docs" && node tools/validate-template.mjs); then
+			echo ""
+			echo "pre-commit: validate-template.mjs failed for ${variant_path}/project-docs/ — commit blocked."
+			echo "Fix the reported issue, re-stage, and commit again."
+			exit 1
+		fi
+	fi
+}
+
+check_variant "full-doc"
+check_variant "on-demand-module-doc"
+
+exit 0
