@@ -14,7 +14,7 @@ A clean, project-agnostic copy of `project-docs/` — no project-specific conten
 ## What's included
 
 - `docs-templates/` — the fixed, seven-category blueprint library. Read-only, never edit.
-- `prompts/` — the full phase-numbered prompt library (`1-discovery/` through `12-maintenance/`), refined across several rounds of real-world use — including `9-sync-docs/2-module-completion-review.md`, added after design-drift, cross-module data-flow, and doc-vs-code gaps were found slipping past every per-task check and only caught by later ad hoc review. Since v7, `3-document-generate/` is one batch prompt per category (all of a category's documents in one run), not one prompt per document. Since v8, module-specific documentation (`5-modules/`, `6-development/`'s late wave) generates just-in-time per module instead of all upfront — see "How the workflow flows" below. Since v9, each module's JIT gate starts with an exhaustive field-and-rule extraction pass (`05-modules/0-field-extraction.md`) before any of its 11 documents are drafted, closing the gap where a module's schema/business-rules/data-dictionary/validation docs could otherwise be generated straight from a necessarily-incomplete BRD.
+- `prompts/` — the full phase-numbered prompt library (`1-discovery/` through `12-maintenance/`), refined across several rounds of real-world use — including `9-sync-docs/2-module-completion-review.md`, added after design-drift, cross-module data-flow, and doc-vs-code gaps were found slipping past every per-task check and only caught by later ad hoc review. Since v7, `3-document-generate/` is one batch prompt per category (all of a category's documents in one run), not one prompt per document. v8 made module-specific documentation (`5-modules/`, `6-development/`'s late wave) generate just-in-time per module instead of all upfront; **this `full-doc` copy reverted that as of v9.9** — module documentation now generates upfront, in a module loop, before any sprint or implementation starts (see "How the workflow flows" below; the `on-demand-module-doc` sibling copy kept the v8 JIT behavior). Since v9, each module's documentation loop starts with an exhaustive field-and-rule extraction pass (`05-modules/0-field-extraction.md`) before any of its 11 documents are drafted, closing the gap where a module's schema/business-rules/data-dictionary/validation docs could otherwise be generated straight from a necessarily-incomplete BRD.
 - `approved-docs/`, `claude-docs/`, `sot-docs/` — empty scaffolds, ready for a new project's actual content.
 - `tools/validate-template.mjs` — a zero-dependency Node script that checks `prompts/` for broken cross-references, missing `**Prompt version:**` lines, and document-count drift against `docs-templates/`. Run it (`node tools/validate-template.mjs`) after editing anything under `prompts/` or `docs-templates/` — catches the kind of dead "Next Step" link that v7.6 above only found via a full manual read-through, mechanically instead of by hand. See the maintenance comment at the top of the script itself for when it needs updating vs. when it doesn't.
 
@@ -31,32 +31,33 @@ flowchart TD
     B --> C["3-document-generate/ (upfront)\n01-project, 02-database, 03-api, 04-ui,\n06-development EARLY wave"]
     C --> D["4-document-review/1-document-review.md\n(per category)"]
     D --> E["5-update-sot/1-update-sot.md\n(cycle 1: upfront categories)"]
-    E --> F["6-implementation-plan/1-implementation-plan.md\nMilestones + Epics created.\nModule epics: task list = TBD"]
 
-    F --> G["7-sprint-planning/1-sprint-planning.md"]
-
-    subgraph JIT["step 2a — just-in-time module gate\n(only if this module's docs don't exist yet)"]
+    subgraph MODLOOP["Upfront module loop — repeats for every module in module-list.md, dependency order"]
         direction TB
-        J0["05-modules/0-field-extraction.md\n(scoped: 1 module, field+rule catalog)"] --> J1["3-document-generate/05-modules/modules.md\n(scoped: 1 module)"]
+        J0["05-modules/0-field-extraction.md\n(scoped: 1 module, field+rule catalog)"] --> J1["3-document-generate/05-modules/modules.md\n(scoped: 1 module, 11 docs)"]
         J1 --> J2["4-document-review/1-document-review.md\n(scoped: 1 module)"]
         J2 --> J3["06-development/development.md\nLATE wave (scoped: 1 module)"]
         J3 --> J4["4-document-review/1-document-review.md\n(scoped: late-wave slice)"]
         J4 --> J5["5-update-sot/1-update-sot.md\n(cycle: this module)"]
-        J5 --> J6["6-implementation-plan/1-implementation-plan.md\n(scoped: this module's epic\nreal tasks derived)"]
     end
 
-    G -->|module undocumented| JIT
-    JIT --> G
-    G -->|module already documented| I
+    E --> MODLOOP
+    MODLOOP -->|module remains undocumented| MODLOOP
+    MODLOOP -->|every module documented| X["3-document-generate/07-cross-cutting/\ncross-cutting.md"]
+    X --> Y["4-document-review/1-document-review.md (scoped)\n+ 2-documentation-review.md (final sweep)"]
+    Y --> Z["5-update-sot/1-update-sot.md\n(final cycle)"]
+    Z --> F["6-implementation-plan/1-implementation-plan.md\nfull Milestones + Epics + Tasks,\none pass — every module already documented"]
+
+    F --> G["7-sprint-planning/1-sprint-planning.md\n(pure task-picker)"]
     G --> I["8-implementation/1-implement-task.md"]
 
-    I -->|"UI Design task\n(module's first touch)"| U1["Build static/mock pages,\nfull working navigation"]
+    I -->|"UI Design task"| U1["Build static/mock pages,\nfull working navigation"]
     U1 --> U2["USER: open in real browser,\nclick through List/Detail/Add/Edit"]
     U2 -->|changes requested| U1
     U2 -->|approved| G
 
-    I -->|"Backend/API task"| K["8-implementation/2-code-review.md"]
-    K --> L["8-implementation/3-generate-tests.md"]
+    I -->|"Backend/API task"| K["8-implementation/2-code-review.md\n(new session)"]
+    K --> L["8-implementation/3-generate-tests.md\n(new session)"]
     L --> M["9-sync-docs/1-sync-docs.md"]
     M -->|more tasks in sprint| I
     M -->|epic's tasks all Done| N["9-sync-docs/2-module-completion-review.md\ndesign fidelity, data-flow, docs-vs-code"]
@@ -66,17 +67,14 @@ flowchart TD
     P --> O
     O -->|confirmed working| Q["Epic marked Complete"]
 
-    Q -->|last module done| R["3-document-generate/07-cross-cutting/\ncross-cutting.md"]
-    R --> S["4-document-review + 5-update-sot\n(final cycle)"]
-    Q -->|more modules / sprints left| G
-
+    Q -->|more sprints left| G
     Q -->|sprint's tasks all Done| T["7-sprint-planning/2-retrospective.md"]
     T --> G
 
     Q -->|milestone's epics all Complete| REL["10-release/1-release.md"]
 ```
 
-**Reading it:** the top half (upfront) generates the shared foundation every module needs — project overview, database, API, UI standards, dev environment — once, before implementation starts. From `7-sprint-planning/` onward, the loop repeats per sprint: any module touched for the first time gets its own 11 documents generated right then (the JIT gate), a brand-new module's UI gets built with static data and approved by the developer in a real browser before backend work starts, and a module's backend can't be marked done until the user has actually clicked through the real, working feature themselves. `07-cross-cutting/` — the one category that needs the full picture — waits for every module to finish this cycle before it runs, once, at the end.
+**Reading it:** the top generates the shared foundation every module needs — project overview, database, API, UI standards, dev environment — once. Then the **module loop** runs every module's full 11-document set plus its late-wave dev docs, one module at a time, before anything else — no module gets skipped ahead to based on sprint timing, since sprints haven't started yet. Once every module is documented, `07-cross-cutting/` runs (it needs the full picture), then implementation planning derives the complete task list in one pass. Only then does `7-sprint-planning/` start, and it's a pure task-picker from there — no documentation-generation gate baked into the sprint loop, since everything's already written. `8-implementation/2-code-review.md` and `3-generate-tests.md` each run in their own new session, separate from the one that implemented the task and from each other — review-independence, not just a size boundary.
 
 ## Data flow (DFD)
 
@@ -95,11 +93,11 @@ flowchart LR
     D7[("claude-docs/gap-analysis/\nreview-log, decisions-log")]
     CODE[("application\nsource code")]
 
-    P1("Doc generation\n3-document-generate/")
+    P1("Doc generation\n3-document-generate/\n(loops per module, upfront)")
     P2("Doc review\n4-document-review/")
     P3("SoT update\n5-update-sot/")
     P4("Implementation planning\n6-implementation-plan/")
-    P5("Sprint planning\n+ JIT module gate\n7-sprint-planning/")
+    P5("Sprint planning\n(pure task-picker)\n7-sprint-planning/")
     P6("Implementation\n8-implementation/")
     P7("Sync docs +\nmodule completion review\n9-sync-docs/")
 
@@ -114,13 +112,12 @@ flowchart LR
     D3 -- "newly approved" --> P3
     P3 -- "authoritative index" --> D4
     D4 -- "current SoT" --> P1
+    D3 -- "which modules still\nundocumented" --> P1
 
-    D3 -- "docs-kit" --> P4
-    P4 -- "milestones/epics/tasks\n(module tasks = TBD)" --> D5
+    D3 -- "docs-kit\n(every module already documented)" --> P4
+    P4 -- "milestones/epics/tasks\n(full task list, one pass)" --> D5
 
-    D5 -- "candidate epics" --> P5
-    D3 -- "which modules\nalready documented" --> P5
-    P5 -- "JIT trigger: undocumented\nmodule's epic selected" --> P1
+    D5 -- "candidate epics,\nall already documented" --> P5
     P5 -- "sprint file" --> D6
 
     D6 -- "this sprint's tasks" --> P6
@@ -136,13 +133,78 @@ flowchart LR
     P7 -- "epic Complete" --> D5
 ```
 
-**Reading it:** Claude never writes application code or docs from thin air — every process reads from a store (templates, drafts, docs-kit, SoT, plan) and writes back to one, and the developer is the only external entity, sitting at both ends of two loops: approving documents before they're promoted, and approving working software (static pages, then real functionality) before a module counts as done. The one flow that makes this template's v8 change visible here is `P5 → P1` — sprint planning feeding back into document generation, module by module, instead of generation only ever flowing forward.
+**Reading it:** Claude never writes application code or docs from thin air — every process reads from a store (templates, drafts, docs-kit, SoT, plan) and writes back to one, and the developer is the only external entity, sitting at both ends of two loops: approving documents before they're promoted, and approving working software (static pages, then real functionality) before a module counts as done. Unlike the `on-demand-module-doc` sibling copy (where sprint planning feeds back into document generation, `P5 → P1`, module by module, as each one's turn comes up), here `P1` loops entirely on its own — checking `D3` for which modules remain undocumented — before `P5` ever runs; by the time sprint planning starts, there's nothing left for it to trigger.
 
 ## Keeping this template current
 
 If you improve `prompts/` or `docs-templates/` on a real project later (the same way earlier findings got folded back into `9-sync-docs/`, `6-implementation-plan/`, and `10-release/`), copy the fixed files back into this template's copies so future projects benefit too — this folder doesn't auto-update.
 
 **Note on `Prompt version` lines vs. this changelog:** the changelog below records the *notable* changes behind each version bump, not every bump — a file's on-disk `**Prompt version:**` line can be ahead of the highest version this changelog mentions for it (a later, undocumented touch-up). The changelog entry is still accurate for what it describes; it just isn't a complete version history. Treat the file's own header line as the source of truth for "what version is this," and this changelog as "why did notable versions change," not a 1:1 log of every bump.
+
+## v9.9 changes (over v9.8) — module documentation moved back to upfront, JIT trigger removed
+
+`full-doc/` finally diverges on its own defining feature. Since v8, `5-modules/` and `6-development/`'s late wave generated just-in-time, triggered by `7-sprint-planning/1-sprint-planning.md` step 2a as each module's epic became a sprint candidate — `full-doc/` had carried that same JIT behavior unchanged through v9.2-v9.8 despite its name, because the redesign (approved 2026-08-20, spec at `docs/superpowers/specs/2026-08-20-upfront-module-docs-design.md`) was written but never applied. Implemented now, at the user's request, after the gap surfaced in conversation.
+
+- **`3-document-generate/05-modules/modules.md`** (bumped 1.7→1.8) — Trigger section rewritten: no longer triggered by sprint planning; runs once per module, upfront, in a module loop right after the four global categories + `6-development` early wave are approved. Same one-module-per-run/resume/review design as before, just relocated.
+- **`3-document-generate/06-development/development.md`** (bumped 1.4→1.5) — late-wave Trigger/Prerequisites/Next Step updated to fire inside the module loop, not via sprint planning.
+- **`3-document-generate/07-cross-cutting/cross-cutting.md`** (bumped 1.5→1.6) — Prerequisites updated: runs once, right after the module loop completes, no longer "deferred to whenever the last module's JIT cycle finishes."
+- **`3-document-generate/04-ui/ui.md`** (bumped 1.4→1.5) — Next Step now says the module loop starts here, not "5-modules does not start here under the JIT model."
+- **`7-sprint-planning/1-sprint-planning.md`** (bumped 1.5→1.6) — step 2a (the JIT gate, including the `<Module> — UI Design` immediate hand-off) deleted entirely. Sprint planning is now a pure task-picker — every epic already has approved docs and a real task list by the time it ever runs.
+- **`prompts/README.md`** — "Just-in-time module documentation" section replaced with "Upfront module documentation"; folder tree, phase table, and "Determining next" section's three module/sprint-related bullets rewritten for the new sequence. Also fixed a pre-existing, unrelated inaccuracy in the "two waves" batch-stop note (previously claimed the late wave waits for "all of `05-modules/` finishing," which was never true even under the old JIT model — it depends on that one module's own docs, not every module).
+- **`6-implementation-plan/1-implementation-plan.md`** (bumped 1.7→1.8) — the original spec didn't list this file, but it needed real fixes: the "empty/TBD task list, filled in later by a module-scoped re-run" mechanic assumed modules weren't documented yet at planning time. Since every module's docs now exist before this prompt ever runs, it derives the full Milestone/Epic/Task set in one pass — the "Re-run scoped to a single module" mode is gone entirely (module-level scoping no longer has a reason to exist under this flow). Milestone *shape* (Milestone 2 UI-only-all-modules, Milestone 3+ backend-per-module, Design-First Strategy) is untouched — still explicitly deferred, per the original spec's scope.
+- **`5-update-sot/1-update-sot.md`** (bumped 1.1→1.2), **`3-document-generate/03-api/api.md`** (bumped 1.3→1.4), **`9-sync-docs/2-module-completion-review.md`** (bumped 1.4→1.5), **`2-document-plan/1-documentation-plan.md`** (bumped 1.5→1.6), **`3-document-generate/05-modules/0-field-extraction.md`** (bumped 1.1→1.2) — each had a stray reference to the old JIT trigger (sprint-planning step 2a, "deferred until a module's epic is a sprint candidate") in a Next Step or Instructions line; none of these were in the original spec's file list, found by a full-tree grep after the spec's listed files were done. All updated to describe the upfront module loop instead.
+- **`prompts/GLOSSARY.md`** — "Just-in-time (JIT) module documentation" term replaced with "Upfront module loop"; "Module field extraction" and "Wave" entries' wording updated to match.
+- **Root `README.md`** (this file) — "How the workflow flows" mermaid diagram and DFD rewritten: the JIT gate subgraph becomes an upfront module loop that runs before sprint planning exists at all; `P5 → P1` feedback edge removed from the DFD (sprint planning no longer triggers doc generation).
+- `on-demand-module-doc/project-docs/` — untouched, remains the JIT reference variant.
+
+## v9.8 changes (over v9.7) — working files written compact, deliverables stay full-prose
+
+Token-saving pass: working/log files that get read back often but are never seen by a stakeholder outside the workflow should be terse — same principle as the `caveman-compress` skill, applied to this kit's own working files. `docs-kit/` deliverables and `sot-docs/` are untouched — those are real documents, not working notes.
+
+- **`8-implementation/1-implement-task.md`** (bumped 1.9→1.10) — `{{task_id}}-todos.md` items must stay short labels, not sentences.
+- **`8-implementation/2-code-review.md`** (bumped 1.3→1.4) — `{{task_id}}-review.md` findings written compact: short, direct, file/line-tied statements, not prose paragraphs.
+- **`8-implementation/3-generate-tests.md`** (bumped 1.2→1.3) — `{{task_id}}-test-report.md` written compact: short lines/tables, not narrative.
+- **`prompts/README.md`** — "Session-end checkpoint" `session-log.md` entries should stay a few short lines per field, not a paragraph.
+
+## v9.7 changes (over v9.6) — design source auto-detected and confirmed, checkbox format dropped
+
+`sot-docs/design/design-source.md` previously recorded which visual design reference a project uses (Figma/screenshots/tokens/generation tool/none) as a manually-ticked checkbox, decided by asking the user cold in `1-project-setup.md`. Changed at the user's request: auto-detect from what's actually present, state the finding, confirm with the user before writing anything — never silently auto-set — and drop the checkbox format entirely in favor of a plain stated `Source:` value.
+
+- **`sot-docs/design/design-source.md`** — new format: `**Source:** <value>` / `**Confirmed:** <date>` instead of a checklist.
+- **`1-discovery/1-project-setup.md`** (bumped 1.1→1.2) — step 8 now scans `screenshots/`, `figma-reference.md`, `tokens.json`, and the raw SoT material for design signals before asking anything; states what it found and asks the user to confirm (or pick differently) before writing `Source:`. Falls back to asking directly only if nothing is detected.
+- **`1-discovery/3-sot-review.md`** (bumped 1.0→1.1), **`1-discovery/4-design-creation.md`** (bumped 1.0→1.1), **`3-document-generate/04-ui/ui.md`** (bumped 1.3→1.4) — all updated from "read which box is checked" to "read the `Source:` value," same five branches, same downstream behavior, just reading/writing a stated value instead of a checkbox.
+- `3-document-generate/05-modules/modules.md`, `9-sync-docs/2-module-completion-review.md`, `prompts/README.md`, `sot-docs/README.md` — already generic ("check design-source.md first" / "per design-source.md"), no checkbox-specific wording to fix; `prompts/README.md`'s one specific `is none` reference updated for clarity.
+
+## v9.6 changes (over v9.5) — housekeeping: stale README fixed, validator wired to a pre-commit hook, session-end checkpoint added
+
+Three small maintenance items raised by the user together in one pass:
+
+- **`docs-templates/README.md` rewritten.** Was stale since before this folder moved under `project-docs/` — called the root folder `docs/`, never said "project-docs," stated "Framework Version: V1" while the rest of the kit was at v9.5, and made no mention of batch generation, the upfront module loop, `docs-kit/`, or `prompts/README.md` as the actual entry point. Rewritten to match current terminology and explicitly defer to `prompts/README.md` for the real workflow sequence, rather than describing its own (now wrong) generation order.
+- **`docs-templates/docs.zip` removed** (already done earlier this session, alongside `on-demand-module-doc`'s copy) — was undocumented, unreferenced by any README, and redundant with the live template files it mirrored.
+- **`tools/validate-template.mjs` wired to a pre-commit hook.** New `.githooks/pre-commit` (repo root, tracked in git) runs the validator against whichever variant's (`full-doc/` and/or `on-demand-module-doc/`) `prompts/` or `docs-templates/` files are staged, blocking the commit if it fails. Activation is per-clone, not automatic (`.git/hooks/` itself isn't tracked): run `git config core.hooksPath .githooks` once after cloning.
+- **New "Session-end checkpoint" section in `prompts/README.md`**, paired with the existing "Session-start recap." The recap reconstructs *what* state things are in from tracking files; nothing previously captured *why* a session stopped where it did or what the very next step should specifically be — that reasoning only ever lived in the closing conversation. New `claude-docs/plan/session-log.md`, one short dated entry per session that did real work: what got done, why stopped here, what's next specifically. Session-start recap now also reads this file's latest entry.
+
+## v9.5 changes (over v9.4) — test generation also runs in its own new session
+
+Extends v9.4's reasoning: the same conversation's reasoning that produced a bug in `1-implement-task.md` can just as easily produce a test in `3-generate-tests.md` that confirms the bug instead of catching it. User confirmed extending the new-session rule to testing too — implement, review, and test are now three separate sessions, not two.
+
+- **`prompts/README.md`** — "Session Boundaries" → "Implementation" paragraph updated: `2-code-review.md` and `3-generate-tests.md` each get their own new session.
+- **`8-implementation/2-code-review.md`** (bumped 1.2→1.3) — Next Step now says run tests in a new session too.
+- **`8-implementation/3-generate-tests.md`** (bumped 1.1→1.2) — new section stating it must run in a fresh session, separate from both implementation and review, re-reading inputs fresh.
+
+## v9.4 changes (over v9.3) — code review now runs in a new session, for real independence
+
+`8-implementation/2-code-review.md` previously ran in the same conversation that had just implemented the task — `prompts/README.md`'s own "Session Boundaries" section explicitly told sessions to keep implement+review together, for context-efficiency reasons. The user pointed out this means the same model, same context, same blind spots reviews its own code — self-review bias, not independent review. Changed at the user's request.
+
+- **`prompts/README.md`** — "Session Boundaries" → "Implementation" paragraph flipped: `2-code-review.md` now always runs in a new session, never the one that ran `1-implement-task.md`. Framed explicitly as a review-independence rule, not just a size boundary — continuity already comes from files, not conversation memory, so this costs nothing extra.
+- **`8-implementation/1-implement-task.md`** (bumped 1.8→1.9) — Next Step now states the new-session requirement plainly, with the reason.
+- **`8-implementation/2-code-review.md`** (bumped 1.1→1.2) — new section stating it must run in a fresh session and re-read `CLAUDE.md`/`docs-kit/6-development/`/the task's source docs fresh, not rely on prior conversation context.
+
+## v9.3 changes (over v9.2) — explicit per-document question-blocking guardrail
+
+The "Never silently assume" instruction already in all 7 `3-document-generate/*.md` batch files implied a document-drafting batch pauses to ask its open questions before moving on, but never said so as an explicit Guardrail — a run could be read as "collect every open question across the whole batch, ask them all at the very end." Made explicit at the user's request.
+
+- **All 7 `3-document-generate/*/*.md` batch files** (each bumped a patch version: `project.md` 1.2→1.3, `database.md` 1.2→1.3, `api.md` 1.2→1.3, `ui.md` 1.2→1.3, `modules.md` 1.6→1.7, `development.md` 1.3→1.4, `cross-cutting.md` 1.4→1.5) — new Guardrails bullet: never start drafting the next document in the batch/wave/module-set while the current one has an open, unanswered question. Blocking is per-document (finish resolving document N before starting N+1), not per-section within one document — confirmed with the user, who considered and rejected the finer-grained option as too many interruptions.
 
 ## v9.2 changes (over v9.1) — dropped per-sprint HTML, dashboard now covers Todos and auto-refreshes on status change
 

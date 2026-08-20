@@ -7,7 +7,18 @@
       "Bash(rm -f docs-templates/5-modules/templates/3-business-rules.md docs-templates/5-modules/templates/5-data-dictionary.md docs-templates/5-modules/templates/6-validation.md docs-templates/5-modules/templates/7-permissions.md docs-templates/5-modules/templates/10-implementation-plan.md)",
       "Bash(rm -f docs-templates/6-development/templates/2-folder-structure.md docs-templates/6-development/templates/4-git-workflow.md docs-templates/6-development/templates/7-deployment-strategy.md docs-templates/6-development/templates/8-containerization.md docs-templates/6-development/templates/9-ci-cd.md docs-templates/6-development/templates/10-debugging-guide.md)",
       "Bash(node tools/validate-template.mjs)",
-      "Bash(mkdir -p \"d:/wamp64_www/claude-project-structure/project-docs-template-lite/docs-templates\" \"d:/wamp64_www/claude-project-structure/project-docs-template-lite/project-docs\")"
+      "Bash(mkdir -p \"d:/wamp64_www/claude-project-structure/project-docs-template-lite/docs-templates\" \"d:/wamp64_www/claude-project-structure/project-docs-template-lite/project-docs\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\full-document-kit\\\\assets\")",
+      "Bash(cp -r \"D:\\\\wamp64_www\\\\claude-project-structure\\\\full-doc\\\\project-docs\" \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\full-document-kit\\\\assets\\\\project-docs\")",
+      "Read(//c/Users/ParimalChaudhari/.claude/skills/full-document-kit/assets/**)",
+      "Edit(~/.claude/skills/full-document-kit/**)",
+      "Bash(python \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\skill-creator\\\\scripts\\\\quick_validate.py\" \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\full-document-kit\")",
+      "Bash(python \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\skill-creator\\\\scripts\\\\package_skill.py\" \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\full-document-kit\")",
+      "Read(//c/Users/ParimalChaudhari/.claude/skills/skill-creator/**)",
+      "Bash(python -m scripts.package_skill \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\full-document-kit\")",
+      "Bash(PYTHONIOENCODING=utf-8 python -m scripts.package_skill \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\full-document-kit\")",
+      "Bash(mv \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\skill-creator\\\\full-document-kit.skill\" \"C:\\\\Users\\\\ParimalChaudhari\\\\.claude\\\\skills\\\\full-document-kit.skill\")",
+      "Read(//c/Users/ParimalChaudhari/.claude/skills/**)"
     ],
     "additionalDirectories": [
       "d:\\wamp64_www\\claude-project-structure\\project-docs-template-lite"

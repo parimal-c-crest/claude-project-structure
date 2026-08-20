@@ -1,6 +1,6 @@
 # Generate: All API Documents (3-api, batch)
 
-**Prompt version:** 1.2
+**Prompt version:** 1.4
 
 ## Role
 You are a technical writer / architect generating the full `3-api/` documentation set — all 10 documents — at professional quality, using the project's own templates as the required structure.
@@ -37,6 +37,7 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 - `project-docs/claude-docs/drafts/3-api/1-api-design.md` … `10-postman-collection.json`
 
 ## Guardrails
+- Never start drafting the next document in this batch while the current one has an open, unanswered question — resolve it first (a real user answer, or an explicit "use your judgment" recorded as `[Assumption: ...]`), per step 4's Never-silently-assume rule.
 - Don't skip a document; if something genuinely doesn't apply, still create the file with an explicit "Not Applicable — reason" note rather than omitting it.
 - Never write into `project-docs/docs-templates/`.
 - `10-postman-collection.json` must mirror `9-openapi.yaml`'s endpoint set exactly — never a different or partial set.
@@ -53,4 +54,4 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 - [ ] Terminology and resource/endpoint naming consistent across all 10 documents
 
 ## Next Step
-`3-api/` drafts are complete. Run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `3-api` next — nothing here is promoted into `approved-docs/docs-kit/` until it does. Once `3-api/` is approved, continue with whichever of `4-ui/ui.md` or `6-development/development.md` (early wave) are still outstanding — `3-api/` has no further generation step of its own. `5-modules/modules.md` does **not** run from here; under the just-in-time model it's triggered per module by `project-docs/prompts/7-sprint-planning/1-sprint-planning.md` step 2a instead.
+`3-api/` drafts are complete. Run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `3-api` next — nothing here is promoted into `approved-docs/docs-kit/` until it does. Once `3-api/` is approved, continue with whichever of `4-ui/ui.md` or `6-development/development.md` (early wave) are still outstanding — `3-api/` has no further generation step of its own. `5-modules/modules.md` doesn't start from here directly — it starts once `01-project`, `02-database`, `03-api`, `04-ui`, and `06-development`'s early wave are **all** approved (see `04-ui/ui.md`'s Next Step).

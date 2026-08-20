@@ -1,12 +1,15 @@
 # Testing
 
-**Prompt version:** 1.1
+**Prompt version:** 1.3
 
 ## Role
 You are a QA engineer verifying that an implemented feature actually meets its requirements.
 
 ## Objective
 Generate and execute the appropriate tests for a task/feature, covering the levels relevant to the change, and report results.
+
+## Runs in a new session — deliberately, not incidentally
+Run this in a fresh session, separate from both `1-implement-task.md` (which wrote the code) and `2-code-review.md` (which just reviewed it) — reasoning that produced a bug can just as easily produce a test that confirms the bug instead of catching it. Don't rely on prior conversation context: re-read the approved implementation, the task's source documentation (acceptance criteria, business rules, validation rules), and `docs-kit/6-development/6-testing-strategy.md` fresh, the same way any new session picks up state from files rather than memory (see `prompts/README.md`'s "Session-start recap").
 
 ## Parameters
 - `task_id` (required) — the approved task from `2-code-review.md`.
@@ -32,7 +35,7 @@ Generate and execute the appropriate tests for a task/feature, covering the leve
 
 ## Output
 - New/updated test files in the project's standard test location.
-- `project-docs/claude-docs/tasks/{{task_id}}-test-report.md` — what was tested, results, coverage of acceptance criteria, any open failures.
+- `project-docs/claude-docs/tasks/{{task_id}}-test-report.md` — what was tested, results, coverage of acceptance criteria, any open failures. Write it compact — a working record re-read by later sessions, not a narrative report; short lines/tables over prose, every result and failure reason still stated plainly.
 
 ## Guardrails
 - Don't skip failure-path and edge-case coverage to save time.

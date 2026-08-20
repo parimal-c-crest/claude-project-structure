@@ -1,30 +1,30 @@
-# Project Documentation Framework
+# Project Documentation Framework — Template Blueprints
 
 > **Purpose**
 >
-> This `docs/` folder is a **standardized documentation framework** used before any development begins on a project. It defines *what* needs to be planned, designed, and agreed upon — across business requirements, architecture, database, API, UI, individual feature modules, and development practices — so that any AI coding assistant (or human developer) can pick up the project with full context and build it consistently, without guessing or re-asking basic questions.
+> `project-docs/docs-templates/` is the **read-only, standardized blueprint library** this project's documentation is generated from — before any development begins. It defines *what* needs to be planned, designed, and agreed upon — across business requirements, architecture, database, API, UI, individual feature modules, and development practices — so that any AI coding assistant (or human developer) can pick up the project with full context and build it consistently, without guessing or re-asking basic questions.
 >
-> This README is the entry point. Read it first, in full, before opening any other document in this folder.
+> This README explains the blueprints themselves. It is **not** the entry point for actually generating documentation — that's `project-docs/prompts/README.md`, which drives the generate → review → promote flow that reads these templates and writes real output elsewhere. Read this file to understand what each template covers and how they're structured; read `prompts/README.md` to actually run the workflow.
 
 ---
 
 ## What This Is
 
-This is a **template-driven, AI-first documentation system**. Every document in this folder:
+This is a **template-driven, AI-first documentation system**. Every template in this folder:
 
 - Follows the **same standard structure** (see "Document Template Pattern" below).
-- Is meant to be **filled in once, per project**, before or alongside development.
+- Is filled in **per project**, by the prompts under `project-docs/prompts/3-document-generate/`, never edited here directly.
 - Is written so an **AI tool can read it and generate correct, consistent output** — code, schemas, APIs, UI, tests — without needing external clarification.
 - Cross-references related documents so context can be traced end-to-end (business need → architecture → database → API → UI → module → implementation → testing).
 
-Currently the files are **blank templates**. Once filled in by the team (or by an AI assistant during discovery), this becomes the single source of truth for the project.
+These files here are **blank templates, never written to directly** — generation writes to `project-docs/claude-docs/drafts/`, and only promotes to `project-docs/approved-docs/docs-kit/` after review. This folder is the fixed skeleton; `docs-kit/` (not this folder) becomes the project's actual filled-in source of truth once generation runs.
 
 ---
 
 ## Folder Structure
 
 ```
-docs/
+project-docs/docs-templates/
 │
 ├── 1-project/         Business context, requirements, features, tech stack
 ├── 2-database/        Database design, ERD, migrations, standards
@@ -58,6 +58,8 @@ The folders are numbered because they represent the **order in which decisions s
 
 An AI tool should **not** jump straight to writing code or designing a module without first understanding `1-project` (especially requirements, feature breakdown, and tech stack) and the relevant global standards in `2-database`, `3-api`, and `4-ui`.
 
+**Generation order in practice** is driven by `project-docs/prompts/README.md`, not this file — in this `full-doc` variant, `5-modules/` and `6-development/`'s late wave run as an upfront loop (one module per run, right after the global categories) rather than being deferred until implementation, and `7-cross-cutting/` runs once, right after that module loop finishes. See `prompts/README.md` for the exact current sequence — it's the authoritative source, this README only explains what each template covers.
+
 ---
 
 ## Folder-by-Folder Purpose
@@ -68,9 +70,9 @@ An AI tool should **not** jump straight to writing code or designing a module wi
 | **2-database/** | Database design, ERD, standards (naming, indexing, constraints), and migration strategy — applies globally across all modules. |
 | **3-api/** | Global API architecture and standards: design principles, auth/authorization, request/response/error/versioning conventions, plus `openapi.yaml` and a Postman collection. |
 | **4-ui/** | Global UI/UX architecture: navigation, user flows, design system, component/form standards, responsive design, and accessibility. |
-| **5-modules/** | One subfolder per business feature (e.g. `authentication/`, `users/`, `products/`, `orders/`). Each module folder contains a full set of documents (see below) describing that one feature end-to-end. Has its own `README.md` explaining the module framework in detail, and a `templates/` folder to copy when starting a new module. |
-| **6-development/** | How the project is actually built day-to-day: local dev environment, folder structure, coding standards, git workflow, implementation workflow, testing, deployment, containerization, CI/CD, debugging. |
-| **7-cross-cutting/** | Concerns that apply across every module rather than one: measurable non-functional requirements (performance, availability, scalability, security, operability) and the system-wide threat model. |
+| **5-modules/** | One subfolder per business feature (e.g. `authentication/`, `users/`, `products/`, `orders/`), generated by `prompts/3-document-generate/05-modules/modules.md`. Each module gets a full set of 11 documents describing that one feature end-to-end. Has its own `README.md` explaining the module framework in detail, and a `templates/` folder mirrored by the generation prompt. |
+| **6-development/** | How the project is actually built day-to-day: local dev environment, folder structure, coding standards, git workflow, implementation workflow, testing, deployment, containerization, CI/CD, debugging. Split into an early wave (project-wide, no module dependency) and a late wave (references real module structure). |
+| **7-cross-cutting/** | Concerns that apply across every module rather than one: measurable non-functional requirements (performance, availability, scalability, security, operability) and the system-wide threat model. Generated last, after everything else, since it cross-checks decisions made everywhere. |
 
 ---
 
@@ -92,27 +94,27 @@ Every document (outside of `5-modules/README.md` and `5-modules/templates/`) fol
 
 ## The Module System (`5-modules/`)
 
-Individual business features (User, Product, Order, Invoice, etc.) are **not** documented inside the global folders — they get their own self-contained folder under `5-modules/`, each with 11 standard documents (module overview, functional spec, business rules, schema, data dictionary, validation, permissions, API, UI, implementation plan, testing).
+Individual business features (User, Product, Order, Invoice, etc.) are **not** documented inside the global folders — they get their own self-contained folder under `5-modules/` (in generated output, under `claude-docs/drafts/5-modules/<slug>/` then `approved-docs/docs-kit/5-modules/<slug>/`), each with 11 standard documents (module overview, functional spec, business rules, schema, data dictionary, validation, permissions, API, UI, implementation plan, testing).
 
 This keeps each feature independently understandable: an AI tool working on the `orders` module should only need `1-project`, the global standards (`2-database`, `3-api`, `4-ui`), and `5-modules/orders/` — not the entire documentation set.
 
-See `5-modules/README.md` for the full module workflow, document responsibilities table, and instructions for creating a new module from `5-modules/templates/`.
+See `5-modules/README.md` for the full module workflow, document responsibilities table, and `prompts/3-document-generate/05-modules/modules.md` for how a module's 11 documents actually get generated.
 
 ---
 
 ## How an AI Tool Should Use This Folder
 
-Before writing any code, an AI tool should:
+This folder is read by the generation prompts, not read directly by a developer starting fresh — start at `project-docs/prompts/README.md` instead, which drives the real workflow. For understanding what a specific already-generated document should contain, or when writing/reviewing that document:
 
-1. Read this README.
-2. Read `1-project/` fully (overview → requirements → feature breakdown → tech stack).
+1. Read this README for context on where the document fits.
+2. Read `docs-kit/1-project/` fully (overview → requirements → feature breakdown → tech stack) if not already read this session.
 3. Read the relevant global standards for the task at hand:
-   - Touching data? Read `2-database/`.
-   - Touching an endpoint? Read `3-api/`.
-   - Touching a screen? Read `4-ui/`.
-4. If working on a specific feature, read that feature's folder under `5-modules/` in full, plus `5-modules/README.md` for the module workflow.
-5. Read the relevant parts of `6-development/` for coding standards, folder structure, git workflow, and testing strategy before implementing.
-6. Follow each document's own **AI Generation Notes** section when filling in or extending that document.
+   - Touching data? Read `docs-kit/2-database/`.
+   - Touching an endpoint? Read `docs-kit/3-api/`.
+   - Touching a screen? Read `docs-kit/4-ui/`.
+4. If working on a specific feature, read that feature's folder under `docs-kit/5-modules/` in full, plus `docs-templates/5-modules/README.md` for the module workflow.
+5. Read the relevant parts of `docs-kit/6-development/` for coding standards, folder structure, git workflow, and testing strategy before implementing.
+6. Follow each template's own **AI Generation Notes** section when filling in or extending that document.
 7. Keep all documents **consistent with each other** — never contradict an already-approved decision in another file; update related docs if a change ripples across them.
 
 ---
@@ -127,8 +129,8 @@ Before writing any code, an AI tool should:
 
 ## Status
 
-This framework is currently a set of **empty templates** — no project-specific content has been filled in yet. Fill in `1-project/` first, then proceed down the folder order above.
+These are **empty templates** — no project-specific content lives here, ever. Real content is generated per-project into `project-docs/claude-docs/drafts/` then `project-docs/approved-docs/docs-kit/` by the prompts under `project-docs/prompts/3-document-generate/`, driven by `project-docs/prompts/README.md`.
 
-**Framework Version:** V1
-**Document Type:** Root Documentation Guide
-**Applies To:** Entire `docs/` folder
+**Framework Version:** tracks `project-docs/README.md`'s own changelog (currently v9.5) — this file describes the blueprints, not the workflow version; see that changelog for what actually changed and when.
+**Document Type:** Docs-templates blueprint index (read-only)
+**Applies To:** `project-docs/docs-templates/` only

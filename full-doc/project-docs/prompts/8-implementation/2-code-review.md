@@ -1,12 +1,15 @@
 # Code Review
 
-**Prompt version:** 1.1
+**Prompt version:** 1.4
 
 ## Role
 You are a senior engineer reviewing a completed task's implementation before it's considered done.
 
 ## Objective
 Review the code produced for a task for correctness, quality, standards compliance, security, and performance, and either approve it or send it back with specific, actionable feedback.
+
+## Runs in a new session — deliberately, not incidentally
+This prompt must run in a fresh session, never the same conversation that ran `1-implement-task.md` for this task — reviewing your own just-written code carries the same blind spots that may have caused any mistakes in the first place; a session with no memory of writing it gives a genuinely independent look instead. Because of this, don't rely on anything from a prior conversation — re-read `CLAUDE.md`, `docs-kit/6-development/` (standards, conventions, architecture), and this task's source documentation fresh, the same way any new session picks up state from files rather than memory (see `prompts/README.md`'s "Session-start recap").
 
 ## Dashboard refresh
 If step 9 sends the task back to `In Progress` (pulling its Epic/Sprint status back from `Complete`), run `project-docs/prompts/11-dashboard/1-generate-dashboard.md` right after — a Task/Epic/Sprint status just changed.
@@ -33,7 +36,7 @@ If step 9 sends the task back to `In Progress` (pulling its Epic/Sprint status b
 9. If **Changes requested**: set the task's status back to `In Progress` in the sprint file and `task-list.md`, then recompute its Epic status in `epics.md` and the sprint's own status per the canonical rollup rule in `6-implementation-plan/1-implementation-plan.md`'s "Status Tracking" section — a task bouncing back out of `Done` can pull its Epic and Sprint back from `Complete` to `In Progress`, and that must show immediately, not just get fixed on the next unrelated task update.
 
 ## Output
-- Review verdict appended to `project-docs/claude-docs/tasks/{{task_id}}-review.md`.
+- Review verdict appended to `project-docs/claude-docs/tasks/{{task_id}}-review.md` — write findings compact: short, direct statements tied to file/line, not prose paragraphs. Keep every specific finding and its reason, drop the narrative framing around them; this file is a working record re-read by later sessions/reviewers, not a deliverable.
 - If changes requested, task status in the sprint file and `task-list.md` set back to `In Progress` with the fix list attached, and Epic/Sprint status recomputed accordingly.
 
 ## Guardrails
@@ -49,4 +52,4 @@ If step 9 sends the task back to `In Progress` (pulling its Epic/Sprint status b
 - [ ] Epic/Sprint status recomputed if the task was sent back
 
 ## Next Step
-If changes were requested, they get fixed and this prompt re-run before proceeding. Once approved, run `project-docs/prompts/8-implementation/3-generate-tests.md` next.
+If changes were requested, they get fixed and this prompt re-run before proceeding. Once approved, run `project-docs/prompts/8-implementation/3-generate-tests.md` next — **in a new session, not this one** (same independence reasoning as this prompt itself running separately from `1-implement-task.md` — see `prompts/README.md`'s "Session Boundaries" → "Implementation").

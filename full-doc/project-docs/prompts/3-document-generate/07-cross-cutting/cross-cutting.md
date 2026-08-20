@@ -1,6 +1,6 @@
 # Generate: All Cross-Cutting Documents (7-cross-cutting, batch)
 
-**Prompt version:** 1.4
+**Prompt version:** 1.6
 
 ## Role
 You are a technical writer / architect (and, for the threat model, a security engineer) generating the full `7-cross-cutting/` documentation set — both documents — at professional quality, using the project's own templates as the required structure.
@@ -14,7 +14,7 @@ This is the only `7-cross-cutting` prompt — it covers both documents in one ru
 If a previous run of this prompt stopped partway through, don't restart from document 1. Check `project-docs/claude-docs/drafts/7-cross-cutting/` for which of the 2 documents already exist — resume from the next missing document, not from scratch.
 
 ## Prerequisites — stop and report if missing
-- Every other category (`1-project/`, `2-database/`, `3-api/`, `4-ui/`, `5-modules/`, `6-development/`) fully generated and approved. This category runs **last**, always — its two documents cross-check decisions made everywhere else. Under the just-in-time module documentation model (`7-sprint-planning/1-sprint-planning.md` step 2a), `5-modules/` and `6-development/`'s late wave complete gradually, one module at a time — this prerequisite isn't satisfied until `module-list.md` shows every module approved, which that step's own Next Step is what checks and triggers this prompt from, once true.
+- Every other category (`1-project/`, `2-database/`, `3-api/`, `4-ui/`, `5-modules/`, `6-development/`) fully generated and approved. This category runs **last**, always — its two documents cross-check decisions made everywhere else. `5-modules/` and `6-development/`'s late wave complete gradually, one module at a time, via the upfront module loop (`3-document-generate/05-modules/modules.md`) — this prerequisite isn't satisfied until `module-list.md` shows every module approved, which that loop's own Next Step is what checks and triggers this prompt from, once true.
 
 ## Inputs
 - The 2 templates in `project-docs/docs-templates/7-cross-cutting/templates/` (`1-non-functional-requirements.md`, `2-threat-model.md`) and `project-docs/docs-templates/7-cross-cutting/README.md`.
@@ -38,6 +38,7 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 - `project-docs/claude-docs/drafts/7-cross-cutting/1-non-functional-requirements.md`, `2-threat-model.md`
 
 ## Guardrails
+- Never start drafting the next document in this batch while the current one has an open, unanswered question — resolve it first (a real user answer, or an explicit "use your judgment" recorded as `[Assumption: ...]`), per step 5's Never-silently-assume rule.
 - Don't skip a document; if something genuinely doesn't apply, still create the file with an explicit "Not Applicable — reason" note rather than omitting it.
 - Never write into `project-docs/docs-templates/`.
 - Don't invent specific SLA/performance numbers unlabeled — an unsourced "99.9% uptime" reads as a real commitment, not a placeholder.

@@ -1,6 +1,6 @@
 # Generate: All Development Documents (6-development, batch)
 
-**Prompt version:** 1.3
+**Prompt version:** 1.5
 
 ## Role
 You are a technical writer / architect generating the full `6-development/` documentation set — all 10 documents — at professional quality, using the project's own templates as the required structure.
@@ -13,16 +13,16 @@ This is the only `6-development` prompt — it covers all 10 documents, run as *
 ## Two waves — different triggers, not just a size split
 Unlike the other batched categories, `6-development/`'s 10 documents split into two groups with different generation cadences:
 - **Early wave** (`1-development-environment.md`, `2-folder-structure.md`, `3-coding-standards.md`, `4-git-workflow.md`, `8-containerization.md`, `9-ci-cd.md`) — no dependency on modules, generated once, upfront, as soon as `1-project/` is approved, in parallel with `02-database/`, `03-api/`, `04-ui/`, as part of `2-document-plan/1-documentation-plan.md`'s upfront batch.
-- **Late wave** (`5-implementation-workflow.md`, `6-testing-strategy.md`, `7-deployment-strategy.md`, `10-debugging-guide.md`) — references a specific module's real structure. Under the default just-in-time flow, this wave is **scoped and regenerated per module**, triggered by `7-sprint-planning/1-sprint-planning.md` step 2a immediately after that module's `05-modules/modules.md` is approved — not a single global run waiting for every module to finish. Each module's late-wave content gets appended to (or merged into) the existing late-wave documents rather than each module producing a separate copy — these four documents describe the project's implementation/testing/deployment/debugging approach as a whole, informed by each module as it's built, not once per module.
+- **Late wave** (`5-implementation-workflow.md`, `6-testing-strategy.md`, `7-deployment-strategy.md`, `10-debugging-guide.md`) — references a specific module's real structure. Under this variant's upfront module loop (see `05-modules/modules.md`'s Trigger section), this wave is **scoped and regenerated per module**, run immediately after that module's `05-modules/modules.md` is approved, as part of the same module-loop iteration — not a single global run waiting for every module to finish, and not triggered by sprint planning. Each module's late-wave content gets appended to (or merged into) the existing late-wave documents rather than each module producing a separate copy — these four documents describe the project's implementation/testing/deployment/debugging approach as a whole, informed by each module as it's built, not once per module.
 
-Run this prompt once for the early wave (6 documents, one confirmation, upfront). Run it again for the late wave (4 documents, one confirmation) every time step 2a's gate reaches that step for a newly-documented module — first run creates the four late-wave documents from that first module's structure; later runs update them to fold in each subsequent module as it's documented. Each wave-run is still one batch, one confirmation — the split is structural, not a reintroduction of per-document stops.
+Run this prompt once for the early wave (6 documents, one confirmation, upfront). Run it again for the late wave (4 documents, one confirmation) once per module, inside the upfront module loop, right after that module's `05-modules/modules.md` is approved — first run creates the four late-wave documents from that first module's structure; later runs update them to fold in each subsequent module as it's documented. Each wave-run is still one batch, one confirmation — the split is structural, not a reintroduction of per-document stops.
 
 ## Resuming an interrupted run
 If a previous run of either wave stopped partway through, don't restart that wave from its first document. Check `project-docs/claude-docs/drafts/6-development/` for which documents already exist — resume from the next missing document in that wave's set, in numeric order, not from scratch.
 
 ## Prerequisites — stop and report if missing
 - Early wave: `project-docs/approved-docs/docs-kit/1-project/` fully generated and approved.
-- Late wave: the one module named by `7-sprint-planning/1-sprint-planning.md` step 2a is complete under `project-docs/claude-docs/drafts/5-modules/<module-slug>/` (or approved under `project-docs/approved-docs/docs-kit/5-modules/<module-slug>/`) — if that module isn't there yet, name it and wait rather than generating the late wave against it. Unlike the old model, this wave does **not** wait for every module in `module-list.md` — only for the one module currently triggering it.
+- Late wave: the module currently being processed by the upfront module loop is complete under `project-docs/claude-docs/drafts/5-modules/<module-slug>/` (or approved under `project-docs/approved-docs/docs-kit/5-modules/<module-slug>/`) — if that module isn't there yet, name it and wait rather than generating the late wave against it. This wave does **not** wait for every module in `module-list.md` — only for the one module currently at this point in the loop.
 
 ## Inputs
 - The 10 templates in `project-docs/docs-templates/6-development/templates/` (`1-development-environment.md` → `10-debugging-guide.md`) and `project-docs/docs-templates/6-development/README.md`.
@@ -30,7 +30,7 @@ If a previous run of either wave stopped partway through, don't restart that wav
 - `project-docs/claude-docs/analysis/project-summary.md`, `module-list.md`, `business-rules-summary.md`, `workflow-summary.md`.
 - `project-docs/claude-docs/gap-analysis/gap-analysis-report.md`, `clarification-questions.md`, `decisions-log.md`.
 - `project-docs/claude-docs/plan/documentation-plan.md` for this category's declared dependencies.
-- Late wave only: the one module named by the triggering gate, under `project-docs/claude-docs/drafts/5-modules/<module-slug>/` or `approved-docs/docs-kit/5-modules/<module-slug>/`, plus (on a second-or-later trigger) the late wave's own existing drafted/approved content from prior modules, to fold this module into rather than overwrite.
+- Late wave only: the module currently at this point in the upfront module loop, under `project-docs/claude-docs/drafts/5-modules/<module-slug>/` or `approved-docs/docs-kit/5-modules/<module-slug>/`, plus (on a second-or-later trigger) the late wave's own existing drafted/approved content from prior modules, to fold this module into rather than overwrite.
 
 ## Instructions
 1. Within each wave, process its documents in numeric order — later documents in the same wave reference earlier ones in that wave, never the reverse.
@@ -46,9 +46,10 @@ If a previous run of either wave stopped partway through, don't restart that wav
 - Late wave: `project-docs/claude-docs/drafts/6-development/5-implementation-workflow.md`, `6-testing-strategy.md`, `7-deployment-strategy.md`, `10-debugging-guide.md` — created on the first module that triggers this wave, updated in place on every subsequent module.
 
 ## Guardrails
+- Never start drafting the next document in this wave while the current one has an open, unanswered question — resolve it first (a real user answer, or an explicit "use your judgment" recorded as `[Assumption: ...]`), per step 4's Never-silently-assume rule.
 - Don't skip a document; if something genuinely doesn't apply, still create the file with an explicit "Not Applicable — reason" note rather than omitting it.
 - Never write into `project-docs/docs-templates/`.
-- Never generate the late wave for a module whose own `05-modules/` documentation isn't done yet — stop and name what's missing instead. Unlike the old model, this is a per-module check, not a whole-`module-list.md` one.
+- Never generate the late wave for a module whose own `05-modules/` documentation isn't done yet — stop and name what's missing instead. This is a per-module check, not a whole-`module-list.md` one.
 - On a second-or-later trigger, don't silently overwrite an earlier module's already-folded-in content — this is an update, not a regeneration.
 - If a dependency document outside this batch (e.g. `1-project/`) doesn't exist yet in `project-docs/approved-docs/docs-kit/`, stop and name it rather than guessing its content.
 
@@ -62,5 +63,5 @@ If a previous run of either wave stopped partway through, don't restart that wav
 - [ ] Terminology and standards consistent across both waves and across every module folded into the late wave so far
 
 ## Next Step
-After the early wave: run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `6-development` (early-wave documents) — nothing here is promoted into `approved-docs/docs-kit/` until it does. `4-ui/` and `3-api/` continue in parallel.
-After the late wave: run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `6-development` (late-wave documents) next — this is step 2a.4 of the just-in-time gate in `7-sprint-planning/1-sprint-planning.md`, which then continues to a scoped `6-implementation-plan/1-implementation-plan.md` re-run before returning to sprint planning. Check `module-list.md`: **only if every module it lists is now approved under `docs-kit/5-modules/`** (i.e. this was the last module), run `project-docs/prompts/3-document-generate/07-cross-cutting/cross-cutting.md` next instead of returning to sprint planning — the cross-cutting category still runs exactly once, last, after everything else, since its two documents (NFR, threat model) cross-check decisions made across every other category including every module. Otherwise, return to sprint planning as normal; cross-cutting waits for a future module to be the one that finishes the set.
+After the early wave: run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `6-development` (early-wave documents) — nothing here is promoted into `approved-docs/docs-kit/` until it does. `4-ui/` and `3-api/` continue in parallel. Once `01-project`, `02-database`, `03-api`, `04-ui`, and this early wave are all approved, run `5-update-sot/1-update-sot.md` once, then the upfront module loop starts: `3-document-generate/05-modules/modules.md`, scoped to the first module in `module-list.md`.
+After the late wave: run `project-docs/prompts/4-document-review/1-document-review.md` scoped to `6-development` (late-wave documents) next, then `5-update-sot/1-update-sot.md` to fold this module in — this is the module loop's own next step for the module just processed, not a return to sprint planning. Check `module-list.md`: **only if every module it lists is now approved under `docs-kit/5-modules/`** (i.e. this was the last module), run `project-docs/prompts/3-document-generate/07-cross-cutting/cross-cutting.md` next — the module loop is complete, and the cross-cutting category runs exactly once, last, after everything else, since its two documents (NFR, threat model) cross-check decisions made across every other category including every module. Otherwise, re-run `3-document-generate/05-modules/modules.md` scoped to the next module in `module-list.md`, continuing the loop.

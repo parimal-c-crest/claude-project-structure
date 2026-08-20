@@ -1,6 +1,6 @@
 # Generate: Module Field & Rule Extraction (05-modules, pre-step)
 
-**Prompt version:** 1.1
+**Prompt version:** 1.2
 
 ## Role
 You are a data/business analyst producing an exhaustive, field-by-field and rule-by-rule fact
@@ -21,7 +21,7 @@ touched, so the documents generated from it have nothing left to assume.
 ## Trigger
 Runs automatically as step 0 of `05-modules/modules.md`, before that prompt's own step 1,
 whenever `project-docs/claude-docs/analysis/module-field-extraction/<module-slug>/` does not yet
-exist or is incomplete for the module `7-sprint-planning/1-sprint-planning.md` step 2a named.
+exist or is incomplete for the module currently being processed by the upfront module loop.
 Once this step's output exists and any Blocking gaps it raised are resolved, control returns to
 `modules.md` step 1.
 

@@ -1,6 +1,6 @@
 # Module Completion Review
 
-**Prompt version:** 1.4
+**Prompt version:** 1.5
 
 ## Role
 You are a QA/design lead running the closing gate on a module before its epic can be marked `Complete` — the check that catches what per-task unit/integration tests structurally cannot.
@@ -78,4 +78,4 @@ Once this epic is marked `Complete` in `epics.md` (per check 4), run `project-do
 - [ ] task-list.md task note(s) updated
 
 ## Next Step
-Once checks 1–3 pass clean (or all found gaps are fixed/logged) **and** the user has explicitly confirmed the module's real functionality in their browser (check 4), the epic can be marked `Complete` in `epics.md`. Return to `project-docs/prompts/7-sprint-planning/1-sprint-planning.md` — it picks the next module's epic next (triggering that module's own just-in-time documentation gate, step 2a, if it hasn't been touched yet), or, once every epic in the active milestone is `Complete`, tells you to run `project-docs/prompts/10-release/1-release.md`.
+Once checks 1–3 pass clean (or all found gaps are fixed/logged) **and** the user has explicitly confirmed the module's real functionality in their browser (check 4), the epic can be marked `Complete` in `epics.md`. Return to `project-docs/prompts/7-sprint-planning/1-sprint-planning.md` — it picks the next module's epic next (its docs and tasks already exist, so no documentation gate to trigger), or, once every epic in the active milestone is `Complete`, tells you to run `project-docs/prompts/10-release/1-release.md`.

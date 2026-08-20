@@ -1,6 +1,6 @@
 # Update Source of Truth
 
-**Prompt version:** 1.1
+**Prompt version:** 1.2
 
 ## Role
 You are the documentation owner responsible for keeping a single, current Source of Truth.
@@ -37,7 +37,7 @@ Promote newly approved documentation (now living under `project-docs/approved-do
 - [ ] No unresolved conflicts remain
 
 ## Next Step
-This prompt runs more than once under the just-in-time module documentation model — its Next Step depends on which cycle just finished:
-- **Initial run** (right after the upfront categories — `1-project`, `2-database`, `3-api`, `4-ui`, `6-development` early wave — are approved): run `project-docs/prompts/6-implementation-plan/1-implementation-plan.md` next — turn the now-current, SoT-backed documentation into a development roadmap. Module epics get created with an empty/TBD task list at this point (see that prompt's Instructions step 3).
-- **Per-module run** (triggered by `project-docs/prompts/7-sprint-planning/1-sprint-planning.md` step 2a, after a module's `05-modules/` and `06-development/` late-wave documents are approved): return to that gate — it continues with a scoped `6-implementation-plan/1-implementation-plan.md` re-run to derive the module's real tasks, then resumes sprint planning.
-- **Final run** (triggered by `project-docs/prompts/3-document-generate/07-cross-cutting/cross-cutting.md`'s Next Step, once `07-cross-cutting/` and `4-document-review/2-documentation-review.md` are both done): nothing further — this closes out documentation generation for the project. Whatever's next is whatever the sprint loop was already doing when the last module completed.
+This prompt runs more than once, once per cycle in the upfront flow — its Next Step depends on which cycle just finished:
+- **Initial run** (right after the upfront categories — `1-project`, `2-database`, `3-api`, `4-ui`, `6-development` early wave — are approved): run `project-docs/prompts/3-document-generate/05-modules/modules.md` next, scoped to the first module in `module-list.md` — the upfront module loop starts.
+- **Per-module run** (after a module's `05-modules/` and `06-development/` late-wave documents are approved, inside the module loop): check `module-list.md` — if any module remains undocumented, re-run `3-document-generate/05-modules/modules.md` scoped to the next one in dependency order; once every module is done, run `3-document-generate/07-cross-cutting/cross-cutting.md` next.
+- **Final run** (triggered by `project-docs/prompts/3-document-generate/07-cross-cutting/cross-cutting.md`'s Next Step, once `07-cross-cutting/` and `4-document-review/2-documentation-review.md` are both done): run `project-docs/prompts/6-implementation-plan/1-implementation-plan.md` next — every module's docs already exist, so it derives the full Milestone/Epic/Task set for the whole project in one pass.
