@@ -1,6 +1,6 @@
 # Generate: All Modules (5-modules, batch)
 
-**Prompt version:** 1.6
+**Prompt version:** 1.7
 
 ## Role
 You are a technical writer / architect generating one module's full documentation set — all 11 of its documents — at professional quality, using the project's own templates as the required structure.
@@ -69,6 +69,7 @@ Modules reference these global standards rather than repeating them — do not p
 - `project-docs/claude-docs/drafts/5-modules/<slug>/1-module.md` … `11-testing.md`, for the one module processed this run.
 
 ## Guardrails
+- Never start drafting the next document in this module's set while the current one has an open, unanswered question — resolve it first (a real user answer, or an explicit "use your judgment" recorded as `[Assumption: ...]`), per step 5's Never-silently-assume rule.
 - Don't parallelize modules against each other if one depends on another (per `documentation-plan.md`) — finish the dependency first.
 - Don't start a second module in the same run — one module's 11 documents, then stop for review.
 - Don't skip a document within a module; if something genuinely doesn't apply, still create the file with an explicit "Not Applicable — reason" note rather than omitting it.

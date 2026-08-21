@@ -1,12 +1,15 @@
 # Generate: Progress Dashboard (output: dashboard.html)
 
-**Prompt version:** 2.2
+**Prompt version:** 2.3
 
 ## Role
 You are a delivery lead producing a visual, at-a-glance progress report for a developer who doesn't want to read raw markdown tables to know where the project stands.
 
 ## On-demand, not linear
 Run this any time — after a sprint planning session, after a batch of tasks complete, or whenever the user just wants to look at current status. It never blocks or gates any other phase, and no other phase depends on it having run. Regenerate from scratch every run; never hand-edit `dashboard.html` — it is a derived view, not a source of truth.
+
+## Also triggered automatically
+Beyond running this on demand, four other prompts trigger it automatically right after they change a Task, Epic, Sprint, or Milestone status: `8-implementation/1-implement-task.md`, `8-implementation/2-code-review.md`, `9-sync-docs/2-module-completion-review.md`, and `7-sprint-planning/1-sprint-planning.md`. This does **not** include Todo checkbox ticks inside a task (`1-implement-task.md` step 5) — those are too frequent to regenerate a full-tree page for each one. A task's Todo checklist on this dashboard is current as of that task's own last status-changing trigger, not live to the second.
 
 ## Scope — markdown-sourced only, not a code-verification tool
 Every number and status on this dashboard comes from `project-docs/claude-docs/`'s own tracking files — never from reading the actual application source code (no parsing route files for live endpoints, no counting test files, no diffing claimed-done tasks against real implementation). This dashboard is exactly as trustworthy as the markdown files a developer keeps current — if `task-list.md` says a task is `Done` but the code doesn't actually do that, this dashboard has no way to know. That's a deliberate scope boundary, not an oversight: keeping this prompt markdown-only means it works from the very start of a project (before any code exists) and never needs guardrails around what source-code paths it's allowed to touch.
@@ -23,6 +26,7 @@ Read every plan/sprint/review file under `project-docs/claude-docs/` and produce
 - `project-docs/claude-docs/plan/epics.md` — epic list, milestone assignment, status, story-point estimate if tracked, Design Status if used
 - `project-docs/claude-docs/plan/task-list.md` — task list, epic assignment, status, estimate, file/folder footprint
 - `project-docs/claude-docs/sprints/sprint-*.md` — every sprint file, its goal, status, and ordered task list (plus parallel-safe batch grouping and Assigned To, if used)
+- `project-docs/claude-docs/tasks/{{task_id}}-todos.md` — each task's Todo checklist and its `N/M complete` header, for the drill-down tree's bottom level
 - `project-docs/claude-docs/plan/raid-log.md` — open Risks/Assumptions/Issues/Dependencies
 - `project-docs/claude-docs/plan/tech-debt-register.md` — outstanding tech debt
 - `project-docs/claude-docs/plan/lifecycle-dashboard.md`, if present — reuse its rollup numbers rather than recomputing from scratch if it's already current
@@ -56,7 +60,8 @@ Parse Task/Epic/Sprint/Milestone status per the rollup rule already defined in `
 **Epics, Milestones & Tasks** (this kit's hierarchy is Milestone → Epic → Task → Todo — no separate Feature/Story layer; don't invent one). Section header states total counts (e.g. "5 milestones · 14 epics · 62 tasks · 90 points"), with filter controls (All / Done / In Progress / Not Started, plus a text filter) if the page includes JS for that (fine to include — this is display filtering only, not the write-back interactivity the guardrails below still forbid).
 - One collapsible row per milestone, in build order: name, status badge, progress bar (% epics complete), epic/task/point counts, expandable to its epics.
 - Nested under each milestone: one row per epic — name, status badge, progress bar (% tasks done), task count summary ("7 Done / 2 In Progress / 1 Blocked / 4 Available"), "lands in Sprint N" if `task-list.md`/sprint files make that traceable. If the epic has a non-blank **Design Status** (Module Design-First Strategy, `epics.md`), show it as its own badge next to the progress bar so a fully-designed-but-backend-pending module reads as real progress, not stalled. Expandable to its tasks.
-- Nested under each epic: one row per task — ID, short description, status badge, point estimate if tracked, **Assigned To** if the sprint/task-list file has that column (omit for solo-developer projects). Blocked tasks show their blocking reason inline (from `task-list.md`'s notes), not just the badge.
+- Nested under each epic: one row per task — ID, short description, status badge, point estimate if tracked, **Assigned To** if the sprint/task-list file has that column (omit for solo-developer projects). Blocked tasks show their blocking reason inline (from `task-list.md`'s notes), not just the badge. Expandable to its Todos.
+- Nested under each task, if `claude-docs/tasks/<task_id>-todos.md` exists: one line per Todo item, checked/unchecked exactly as the source file shows, plus the file's own `N/M complete` header as the row's subtext. This is the tree's bottom level — Milestone → Epic → Task → Todo, drillable at every level, matching this kit's actual hierarchy. If the todos file doesn't exist yet for a task (not started), omit the Todo row entirely rather than showing an empty expander.
 
 **Legend.** One line defining each status badge's meaning in this kit's own terms — `Done` = task marked Done in `task-list.md`, `In Progress` = actively claimed, `Blocked` = stuck per a noted reason, `Available`/`Not Started` = not yet claimed, `Cancelled` = no longer wanted (excluded from all completion math). Keep this to what the markdown files actually represent — don't imply a stronger guarantee (like "verified by tests") that this markdown-only dashboard can't back up.
 
@@ -99,6 +104,7 @@ Parse Task/Epic/Sprint/Milestone status per the rollup rule already defined in `
 - [ ] Status colors and rollup math match `6-implementation-plan/1-implementation-plan.md`'s Status Tracking rules (implementation) and this file's own Not Started/Drafted/Approved model (documentation)
 - [ ] File is self-contained (no external requests) and readable in both light and dark OS themes
 - [ ] Auto-refresh present at the stated interval, and expanded rows/filter text survive it via `sessionStorage`
+- [ ] Todo checklists shown as the tree's bottom level under each task that has one, checked state matching the source file exactly
 - [ ] Written to `project-docs/claude-docs/plan/dashboard.html`
 
 ## Next Step
