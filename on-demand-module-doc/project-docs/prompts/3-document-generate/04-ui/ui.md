@@ -1,6 +1,6 @@
 # Generate: All UI Documents (4-ui, batch)
 
-**Prompt version:** 1.2
+**Prompt version:** 1.3
 
 ## Role
 You are a technical writer / architect generating the full `4-ui/` documentation set — all 8 documents — at professional quality, using the project's own templates as the required structure.
@@ -28,12 +28,12 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 1. Process the 8 documents **in numeric order** (`1-navigation.md` → `8-frontend-development-standards.md`) — later documents in the set reference earlier ones, never the reverse.
 2. For each document: read its template fully first — headings/structure are the contract, do not restructure. Read the earlier documents this batch has already drafted in `project-docs/claude-docs/drafts/4-ui/` that it depends on, plus any approved dependency from another category in `project-docs/approved-docs/docs-kit/`, before writing it.
 3. **When writing `2-user-flows.md`, if `design-source.md` has `screenshots` (or any other visual reference) checked, walk every screen literally before writing its flow.** For each screen a flow passes through, open its matching screenshot/frame and record the concrete, observable facts — exact visible fields, buttons, labels/copy text, layout regions, and any state only reachable by interacting (a drawer, a modal, an expanded row) — as a checklist inside that flow's section, not as generic prose ("a form with relevant fields"). A flow description vague enough to fit any layout is exactly what lets the built UI drift from the reference without anyone noticing until someone does a screenshot comparison after the fact — the goal here is to make that drift impossible by being specific now.
-4. **When writing `3-design-system.md`, read `project-docs/sot-docs/design/design-source.md` first** — the discovery phase should already have resolved which box is checked and confirmed the referenced material actually exists. Don't re-discover the design source from scratch here:
-   - `tokens` checked → `project-docs/sot-docs/design/tokens.json` is authoritative — use its exact values, don't override them with defaults.
-   - `screenshots` checked → read every file in `project-docs/sot-docs/design/screenshots/` directly (they're images — use vision to inspect actual colors, spacing, typography, and component patterns) and derive token values from what's actually shown, not a generic palette.
-   - `figma` checked → read `project-docs/sot-docs/design/figma-reference.md` and use the Figma MCP tools to pull live design context (variables, screenshots, component specs) from each linked frame.
-   - `stitch-generate` checked → confirm a Stitch MCP tool is actually available in this session before relying on it; if not, stop and tell the user it needs to be connected (`claude mcp add stitch ...` + session restart) rather than silently falling back to defaults.
-   - `none` checked, or `design-source.md`/all referenced files are missing → fall back to a professional default token set (e.g. built on the chosen CSS framework's standard scale) and mark every token `[Assumption: this document]`, clearly noting in the Executive Summary that no brand/visual reference was available.
+4. **When writing `3-design-system.md`, read `project-docs/sot-docs/design/design-source.md` first** — the discovery phase should already have resolved and confirmed what `Source:` says and confirmed the referenced material actually exists. Don't re-discover the design source from scratch here:
+   - `Source: Design tokens` → `project-docs/sot-docs/design/tokens.json` is authoritative — use its exact values, don't override them with defaults.
+   - `Source: Screenshots` → read every file in `project-docs/sot-docs/design/screenshots/` directly (they're images — use vision to inspect actual colors, spacing, typography, and component patterns) and derive token values from what's actually shown, not a generic palette.
+   - `Source: Figma` → read `project-docs/sot-docs/design/figma-reference.md` and use the Figma MCP tools to pull live design context (variables, screenshots, component specs) from each linked frame.
+   - `Source: Generation tool` (e.g. Stitch) → confirm a Stitch MCP tool is actually available in this session before relying on it; if not, stop and tell the user it needs to be connected (`claude mcp add stitch ...` + session restart) rather than silently falling back to defaults.
+   - `Source: None`, blank, or `design-source.md`/all referenced files are missing → fall back to a professional default token set (e.g. built on the chosen CSS framework's standard scale) and mark every token `[Assumption: this document]`, clearly noting in the Executive Summary that no brand/visual reference was available.
 5. Every requirement, rule, or design decision must trace back to a SoT source or a recorded decision/assumption — cite inline, e.g. `[Source: project-docs/sot-docs/raw/brd.md §6]` or `[Assumption: gap-analysis N2]`.
 6. **Never silently assume.** Where detail is insufficient, note it as an open question while drafting — don't write a guessed value into the document yet. Once this document is otherwise fully drafted, stop and ask the user every open question for it together, in one plain-language round (not as separate interruptions per question). Only write the final content after the user answers: use their real answer if given; if they explicitly say to use your own judgment, write `[Assumption: ...]` — a deferred call the user actually approved, not a silent guess. Reserve `[NEEDS INPUT: ...]` for something genuinely blocking even after asking (the user doesn't know either, needs to check something first) — not a substitute for asking in the first place.
 7. Keep terminology, design tokens (from `3-design-system.md`), and component naming consistent across all 8 documents.
@@ -43,6 +43,7 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 - `project-docs/claude-docs/drafts/4-ui/1-navigation.md` … `8-frontend-development-standards.md`
 
 ## Guardrails
+- Never start drafting the next document in this batch while the current one has an open, unanswered question — resolve it first (a real user answer, or an explicit "use your judgment" recorded as `[Assumption: ...]`), per step 6's Never-silently-assume rule.
 - Don't skip a document; if something genuinely doesn't apply, still create the file with an explicit "Not Applicable — reason" note rather than omitting it.
 - Never write into `project-docs/docs-templates/`.
 - Never let `4-component-standards.md` through `8-frontend-development-standards.md` introduce design tokens/values that contradict `3-design-system.md`'s already-established set within this same batch.
@@ -52,7 +53,7 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 - [ ] `1-project/` confirmed approved before starting
 - [ ] All 8 documents present, in numeric order
 - [ ] `2-user-flows.md` walked every referenced screenshot literally, where one exists, instead of writing generic flow prose
-- [ ] `3-design-system.md` followed `design-source.md`'s resolved source before falling back to defaults
+- [ ] `3-design-system.md` followed `design-source.md`'s `Source:` value before falling back to defaults
 - [ ] All content traceable to SoT, an approved document, or a labeled assumption
 - [ ] Open `[NEEDS INPUT]` markers collected and listed for the user
 - [ ] No `[Assumption: ...]` was written without first asking the user and getting an explicit "use your judgment" response

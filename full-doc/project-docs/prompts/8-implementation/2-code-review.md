@@ -1,6 +1,6 @@
 # Code Review
 
-**Prompt version:** 1.4
+**Prompt version:** 1.5
 
 ## Role
 You are a senior engineer reviewing a completed task's implementation before it's considered done.
@@ -12,7 +12,7 @@ Review the code produced for a task for correctness, quality, standards complian
 This prompt must run in a fresh session, never the same conversation that ran `1-implement-task.md` for this task — reviewing your own just-written code carries the same blind spots that may have caused any mistakes in the first place; a session with no memory of writing it gives a genuinely independent look instead. Because of this, don't rely on anything from a prior conversation — re-read `CLAUDE.md`, `docs-kit/6-development/` (standards, conventions, architecture), and this task's source documentation fresh, the same way any new session picks up state from files rather than memory (see `prompts/README.md`'s "Session-start recap").
 
 ## Dashboard refresh
-If step 9 sends the task back to `In Progress` (pulling its Epic/Sprint status back from `Complete`), run `project-docs/prompts/11-dashboard/1-generate-dashboard.md` right after — a Task/Epic/Sprint status just changed.
+If step 9 sends the task back to `In Progress` (pulling its Epic/Sprint status back from `Complete`), or step 8b sets it to `Blocked` on round 3, run `project-docs/prompts/11-dashboard/1-generate-dashboard.md` right after — a Task/Epic/Sprint status just changed.
 
 ## Parameters
 - `task_id` (required) — the task just implemented via `1-implement-task.md`.
@@ -33,16 +33,21 @@ If step 9 sends the task back to `In Progress` (pulling its Epic/Sprint status b
 7. Check scope: does the diff contain only this task's change, or did unrelated changes sneak in?
 8. Produce a verdict: **Approved**, **Approved with minor fixes** (apply if trivial), or **Changes requested** (specific list, each tied to a file/line where possible).
 8a. If the review surfaces a real shortcut, known limitation, or deferred cleanup that's being accepted rather than fixed now (e.g. "this works but doesn't scale past N records, revisit later"), log it to `project-docs/claude-docs/plan/tech-debt-register.md` rather than letting it live only in this review's notes where it'll never resurface.
-9. If **Changes requested**: set the task's status back to `In Progress` in the sprint file and `task-list.md`, then recompute its Epic status in `epics.md` and the sprint's own status per the canonical rollup rule in `6-implementation-plan/1-implementation-plan.md`'s "Status Tracking" section — a task bouncing back out of `Done` can pull its Epic and Sprint back from `Complete` to `In Progress`, and that must show immediately, not just get fixed on the next unrelated task update.
+8b. Before acting on a **Changes requested** verdict, count the existing `## Review Round N` sections already in `{{task_id}}-review.md`. This review is round `(count + 1)`.
+   - Round 1 or round 2: proceed to step 9 as normal.
+   - Round 3 (i.e. two prior rounds already ended in Changes requested): do not send the task back again. Set its status to `Blocked` instead of `In Progress`, with the note "review loop cap reached — needs human decision," and stop — do not re-run this prompt automatically.
+9. If **Changes requested** and this is round 1 or 2 (per 8b): set the task's status back to `In Progress` in the sprint file and `task-list.md`, then recompute its Epic status in `epics.md` and the sprint's own status per the canonical rollup rule in `6-implementation-plan/1-implementation-plan.md`'s "Status Tracking" section — a task bouncing back out of `Done` can pull its Epic and Sprint back from `Complete` to `In Progress`, and that must show immediately, not just get fixed on the next unrelated task update.
 
 ## Output
-- Review verdict appended to `project-docs/claude-docs/tasks/{{task_id}}-review.md` — write findings compact: short, direct statements tied to file/line, not prose paragraphs. Keep every specific finding and its reason, drop the narrative framing around them; this file is a working record re-read by later sessions/reviewers, not a deliverable.
-- If changes requested, task status in the sprint file and `task-list.md` set back to `In Progress` with the fix list attached, and Epic/Sprint status recomputed accordingly.
+- Review verdict appended to `project-docs/claude-docs/tasks/{{task_id}}-review.md` as a dated `## Review Round N` section — write findings compact: short, direct statements tied to file/line, not prose paragraphs. Keep every specific finding and its reason, drop the narrative framing around them; this file is a working record re-read by later sessions/reviewers, not a deliverable.
+- If changes requested and round is 1 or 2, task status in the sprint file and `task-list.md` set back to `In Progress` with the fix list attached, and Epic/Sprint status recomputed accordingly.
+- If changes requested and round is 3, task status set to `Blocked` with the "review loop cap reached" note, and the auto-loop stopped.
 
 ## Guardrails
 - Don't approve code that doesn't meet its documented acceptance criteria, regardless of code quality.
 - Be specific — "improve error handling" is not actionable; "handle the null case at line 42 before dereferencing" is.
 - If changes are requested, never leave Epic/Sprint status showing `Complete` on the strength of a task that just got sent back.
+- Never auto-loop code review past 2 rounds — a task still failing review after 2 independent passes needs a human decision, not a 3rd automated pass.
 
 ## Completion Checklist
 - [ ] Todo checklist confirmed complete
@@ -50,6 +55,7 @@ If step 9 sends the task back to `In Progress` (pulling its Epic/Sprint status b
 - [ ] Quality, standards, security, performance checked
 - [ ] Verdict recorded; task status updated accordingly
 - [ ] Epic/Sprint status recomputed if the task was sent back
+- [ ] If this is round 3+, task marked `Blocked` and escalated instead of auto-looped
 
 ## Next Step
-If changes were requested, they get fixed and this prompt re-run before proceeding. Once approved, run `project-docs/prompts/8-implementation/3-generate-tests.md` next — **in a new session, not this one** (same independence reasoning as this prompt itself running separately from `1-implement-task.md` — see `prompts/README.md`'s "Session Boundaries" → "Implementation").
+If changes were requested and this was round 1 or 2, they get fixed and this prompt re-run before proceeding. If this was round 3, the task is `Blocked` — do not re-run this prompt again automatically; a human decides next steps. Once approved, run `project-docs/prompts/8-implementation/3-generate-tests.md` next — **in a new session, not this one** (same independence reasoning as this prompt itself running separately from `1-implement-task.md` — see `prompts/README.md`'s "Session Boundaries" → "Implementation").

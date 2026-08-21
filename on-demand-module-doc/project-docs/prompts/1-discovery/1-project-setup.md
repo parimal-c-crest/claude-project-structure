@@ -1,6 +1,6 @@
 # Project Setup
 
-**Prompt version:** 1.1
+**Prompt version:** 1.2
 
 ## Role
 You are a senior technical lead setting up a new software project for AI-assisted development.
@@ -40,7 +40,14 @@ Initialize the `project-docs/` folder structure and root-level project files so 
    - `project-docs/sot-docs/index.md` (populated in `3-sot-review.md`)
    - `project-docs/sot-docs/changelog.md` (populated from `5-update-sot/` onward)
 7. If `project-docs/sot-docs/raw/` is empty, ask the user for their project material (BRD, vision doc, notes, etc.) before proceeding — do not invent business content at this stage.
-8. If `project-docs/sot-docs/design/design-source.md` doesn't exist, create it and ask the user to check the box that matches how they'll provide visual design (Figma, screenshots, tokens, generation tool, or none) — decided once, upfront, so it doesn't need rediscovering mid-workflow at the UI-generation stage. Don't block on an answer if the user wants to decide later; leave it unchecked and move on.
+8. If `project-docs/sot-docs/design/design-source.md` doesn't exist, create it (empty `Source:` field) — this decision gets made once, upfront, so it doesn't need rediscovering mid-workflow at the UI-generation stage. **Auto-detect before asking, then confirm — never write `Source:` on a guess:**
+   - `project-docs/sot-docs/design/screenshots/` already has files → candidate: Screenshots.
+   - `project-docs/sot-docs/design/figma-reference.md` exists with a real URL/frame reference (not the empty template) → candidate: Figma.
+   - `project-docs/sot-docs/design/tokens.json` exists with real values (not the template skeleton) → candidate: Design tokens.
+   - Scan the raw SoT material already under `project-docs/sot-docs/raw/` for a Figma URL or a "see attached screenshots"-type mention not yet reflected under `sot-docs/design/` — if found, flag it and offer to save the reference (e.g. "found a Figma link in your BRD — is `<url>` the design reference? I'll save it to `figma-reference.md`").
+   - **State whatever was found and ask the user to confirm** (or pick something else) before writing anything — e.g. "Found 6 files in `screenshots/` — use Screenshots as the design source?" A wrong auto-detect (stray unrelated images, an old placeholder link) needs to be catchable immediately, not discovered later at UI-generation time.
+   - If nothing is detected, ask directly as before: Figma, screenshots, tokens, a generation tool, or none.
+   - Once confirmed, write `Source:` and `Confirmed:` (today's date) into `design-source.md`. Don't block on an answer if the user wants to decide later — leave `Source:` blank and move on.
 9. Create/confirm a root `CLAUDE.md`: project summary, tech stack (once known), coding standards pointer, a map of the four `project-docs/` areas above, the planning hierarchy (`Project → Milestone → Epic → Task → Todo`, see `6-implementation-plan/1-implementation-plan.md`), a pointer to `project-docs/prompts/README.md` as the workflow entry point, a pointer to `project-docs/prompts/GLOSSARY.md` for any unfamiliar term, and a **Communication Conventions** section (verbatim rule, not project-specific — copy it as-is):
    - **Status prefixes:** use an icon + bold label when a response contains a warning, error, skipped/blocked item, or confirmation — ⚠️ **WARNING**, 🚫 **SKIPPED** / **BLOCKED**, ❌ **ERROR** / **FAILED**, ✅ **DONE** / **CONFIRMED**, ℹ️ **NOTE**. Only when the content actually is that kind of status, not decoratively on every line.
    - **Plain-language questions:** state any question to the developer in plain language before naming jargon/internal terminology. When offering options, explain in one clause what choosing each one actually does, and if one is recommended, say why in the same breath — never just a label like "(Recommended)" with no reason.
@@ -66,7 +73,7 @@ Initialize the `project-docs/` folder structure and root-level project files so 
 - [ ] `project-docs/docs-templates/` and `project-docs/prompts/` presence confirmed (not modified)
 - [ ] `project-docs/approved-docs/docs-kit/`, `claude-docs/*`, `sot-docs/*` folders confirmed/created
 - [ ] `project-docs/sot-docs/raw/` has at least one source document, or the user has been asked for one
-- [ ] `project-docs/sot-docs/design/design-source.md` created (checked or explicitly left open)
+- [ ] `project-docs/sot-docs/design/design-source.md` created — `Source:` auto-detected and confirmed with the user, or explicitly left blank
 - [ ] Root `CLAUDE.md`, `README.md`, `CHANGELOG.md` confirmed/created
 - [ ] User has confirmed the setup
 

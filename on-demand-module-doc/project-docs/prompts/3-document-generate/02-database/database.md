@@ -1,6 +1,6 @@
 # Generate: All Database Documents (2-database, batch)
 
-**Prompt version:** 1.2
+**Prompt version:** 1.3
 
 ## Role
 You are a technical writer / architect generating the full `2-database/` documentation set — all 4 documents — at professional quality, using the project's own templates as the required structure.
@@ -40,6 +40,7 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 - `project-docs/claude-docs/drafts/2-database/1-database-design.md` … `4-database-standards.md`
 
 ## Guardrails
+- Never start drafting the next document in this batch while the current one has an open, unanswered question — resolve it first (a real user answer, or an explicit "use your judgment" recorded as `[Assumption: ...]`), per step 5's Never-silently-assume rule.
 - Don't skip a document; if something genuinely doesn't apply, still create the file with an explicit "Not Applicable — reason" note rather than omitting it.
 - Never write into `project-docs/docs-templates/`.
 - Never let `2-erd.md`, `3-migration-strategy.md`, or `4-database-standards.md` restate a different engine, entity list, or primary key strategy than `1-database-design.md` already established in this same batch.

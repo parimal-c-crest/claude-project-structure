@@ -1,6 +1,6 @@
 # Source of Truth (SoT) Collection
 
-**Prompt version:** 1.0
+**Prompt version:** 1.1
 
 ## Role
 You are a business analyst responsible for building a single, organized Source of Truth from everything the user has provided about the project.
@@ -19,12 +19,12 @@ Collect, catalog, and index every available document describing the project so l
 3. Distinguish project content from framework/process content:
    - **Project content** (BRD, vision, notes, specs) → goes in `project-docs/sot-docs/raw/`, gets cataloged.
    - **Framework/process docs** that describe how agents/skills should behave, not the project itself, are not SoT material — leave them where they are and don't index them as project sources (ask the user if it's unclear which a given file is).
-4. **Check `project-docs/sot-docs/design/design-source.md` first** — `1-project-setup.md` should have created it. Read which box is checked (if any) rather than asking the user to repeat themselves:
-   - `figma` → confirm `project-docs/sot-docs/design/figma-reference.md` is filled in; if not, ask for it now.
-   - `screenshots` → confirm `project-docs/sot-docs/design/screenshots/` has files; if empty, ask the user to add them.
-   - `tokens` → confirm `project-docs/sot-docs/design/tokens.json` is filled in; if not, ask for it now.
-   - a generation tool (e.g. Stitch) → check whether the relevant tool is actually available in this session. If not, tell the user it needs to be connected first, then a session restart, before UI generation can use it — don't silently fall back to defaults without saying so.
-   - `none`, or the file is unchecked/missing → ask the user directly: use generic default tokens (fast, no visual identity), or run `project-docs/prompts/1-discovery/4-design-creation.md` next to establish a real one from scratch. Note whichever they choose in `design-source.md` before moving on — don't leave it ambiguous.
+4. **Check `project-docs/sot-docs/design/design-source.md` first** — `1-project-setup.md` should have created it, with `Source:` already auto-detected and confirmed (or left blank). Read the `Source:` value rather than asking the user to repeat themselves:
+   - `Figma` → confirm `project-docs/sot-docs/design/figma-reference.md` is filled in; if not, ask for it now.
+   - `Screenshots` → confirm `project-docs/sot-docs/design/screenshots/` has files; if empty, ask the user to add them.
+   - `Design tokens` → confirm `project-docs/sot-docs/design/tokens.json` is filled in; if not, ask for it now.
+   - `Generation tool` (e.g. Stitch) → check whether the relevant tool is actually available in this session. If not, tell the user it needs to be connected first, then a session restart, before UI generation can use it — don't silently fall back to defaults without saying so.
+   - `None`, or `Source:` is blank → ask the user directly: use generic default tokens (fast, no visual identity), or run `project-docs/prompts/1-discovery/4-design-creation.md` next to establish a real one from scratch. Write whichever they choose into `design-source.md`'s `Source:`/`Confirmed:` fields before moving on — don't leave it ambiguous.
    - Once resolved, index whatever design material exists (title, source, type, one-line summary), same as any other SoT document (step 6).
 5. If a document contains a live credential, API key, token, or other secret: do **not** copy, index, or distribute its contents. Flag it explicitly to the user and exclude it from the catalog, noting only that it was excluded and why.
 6. For each cataloged document (including anything under `design/`), record: title, source, date (if known), type (vision/BRD/notes/design-reference/etc.), one-line summary.

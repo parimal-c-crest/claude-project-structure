@@ -1,6 +1,6 @@
 # Sprint Planning
 
-**Prompt version:** 1.4
+**Prompt version:** 1.5
 
 ## Role
 You are a delivery lead planning the next sprint from the existing task backlog.
@@ -52,6 +52,7 @@ Determine the active milestone, then select, prioritize, and commit a specific s
 7. Order the selected tasks within the sprint by dependency (a task never appears before something it depends on within the same sprint) — within each developer's assigned batch, not necessarily across the whole sprint.
 8. Record the sprint goal in one sentence.
 9. Initialize the sprint's own `status` field to `Not Started` in the sprint file — this is a rollup over its tasks, kept current by `8-implementation/1-implement-task.md` and `2-code-review.md` the same way `epics.md` is (see "Status Tracking" in `6-implementation-plan/1-implementation-plan.md`).
+9a. **Dashboard refresh.** If this run changed `milestone-status.md` (new active milestone, or marked `Complete`) or created a new sprint file, run `project-docs/prompts/11-dashboard/1-generate-dashboard.md` right after — Milestone/Sprint status just changed, and the dashboard should reflect it without the developer having to remember to regenerate it.
 
 ## Output
 - `project-docs/claude-docs/sprints/sprint-{{n}}.md` — sprint goal, milestone + epic references, sprint **status** (`Not Started` / `In Progress` / `Complete`), ordered task list with IDs, status column, and **Assigned To** column (blank if solo developer, a specific name if multiple), start/end dates (if used). If multiple developers, group the task list visibly by parallel-safe batch, not one flat queue.
@@ -75,6 +76,7 @@ Determine the active milestone, then select, prioritize, and commit a specific s
 - [ ] Task selection respects dependencies and capacity, stays within the active milestone
 - [ ] Tasks ordered by dependency within the sprint
 - [ ] Sprint backlog file created with its own status initialized to `Not Started`
+- [ ] Dashboard refreshed (`11-dashboard/1-generate-dashboard.md`) if this run changed milestone status or created the sprint file
 
 ## Next Step
-Run `project-docs/prompts/7-sprint-planning/3-generate-sprint-page.md` next — it generates a one-page HTML view of this sprint. That prompt then hands off to `project-docs/prompts/8-implementation/1-implement-task.md`, which works through this sprint's tasks in order, one at a time.
+Run `project-docs/prompts/8-implementation/1-implement-task.md` next — it works through this sprint's tasks in order, one at a time.
