@@ -1,6 +1,6 @@
 # Module Completion Review
 
-**Prompt version:** 1.3
+**Prompt version:** 1.4
 
 ## Role
 You are a QA/design lead running the closing gate on a module before its epic can be marked `Complete` — the check that catches what per-task unit/integration tests structurally cannot.
@@ -15,6 +15,9 @@ This prompt exists so those three checks happen once per module, on a schedule, 
 
 ## Objective
 For one epic (module) whose tasks are all `Done`, verify: (1) the built UI matches the design source, including interaction-only states; (2) the module's data actually flows to/from every module its own docs say it connects to; (3) every claim in this module's `docs-kit` documents is backed by real, working code. Fix genuine gaps found; log everything.
+
+## Dashboard refresh
+Once this epic is marked `Complete` in `epics.md` (per check 4), run `project-docs/prompts/11-dashboard/1-generate-dashboard.md` right after — Epic status just changed.
 
 ## Parameters
 - `epic_id` (required) — a `<Module> — Backend/API` epic (or a module's single epic under a fully vertical structure) whose tasks are all `Done` in `task-list.md`. **Not** a `<Module> — UI Design` epic — that epic's completion gate is the Design Status review loop in `8-implementation/1-implement-task.md`, not this prompt; running this review against mock-only pages would check data-flow and docs-vs-code against code that doesn't exist yet. Also not applicable to non-module epics (Environment Setup, App Shell/Chrome, the standing Maintenance epic) — those have no `5-modules/` documentation to check against, and complete once their tasks are Done. See `6-implementation-plan/1-implementation-plan.md`'s Status Tracking rule for the full breakdown by epic type.

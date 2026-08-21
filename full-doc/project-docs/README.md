@@ -141,6 +141,15 @@ If you improve `prompts/` or `docs-templates/` on a real project later (the same
 
 **Note on `Prompt version` lines vs. this changelog:** the changelog below records the *notable* changes behind each version bump, not every bump — a file's on-disk `**Prompt version:**` line can be ahead of the highest version this changelog mentions for it (a later, undocumented touch-up). The changelog entry is still accurate for what it describes; it just isn't a complete version history. Treat the file's own header line as the source of truth for "what version is this," and this changelog as "why did notable versions change," not a 1:1 log of every bump.
 
+## v9.10 changes (over v9.9) — code review auto-loop capped at 2 rounds
+
+`8-implementation/2-code-review.md`'s send-back-and-re-review loop had no round limit — a task could bounce between fix and fresh-session review indefinitely chasing a zero-issue signal. User requested a hard cap, since 2 independent review passes is enough judgment before a persisting disagreement needs a human, not a 3rd automated pass.
+
+- **`8-implementation/2-code-review.md`** (bumped 1.4→1.5) — new step 8b: before acting on a **Changes requested** verdict, count existing `## Review Round N` sections in `{{task_id}}-review.md`. Round 1 or 2 proceeds as before (status back to `In Progress`, re-run in a new session). Round 3 instead sets the task to `Blocked` with a "review loop cap reached — needs human decision" note and stops the auto-loop. New Guardrail and Completion Checklist item added to match.
+- Applied identically to both `full-doc/` and `on-demand-module-doc/` copies (this prompt was already identical between the two variants) and to both packaged skills' mirrors (`full-document-kit`, `on-demand-document-kit`).
+- `9-sync-docs/2-module-completion-review.md`'s separate user-live-browser-confirmation loop is untouched — that loop is bounded by a real human confirming real behavior each round, not an agent re-judging agent-fixed code, so the same runaway-loop risk doesn't apply.
+- Change went through 2 independent fresh-session reviews before landing: round 1 caught the "Next Step" section still saying unconditionally "this prompt re-run" — fixed to caveat round 1/2 vs. round 3/`Blocked`. Round 2 approved, and separately flagged the "Dashboard refresh" section only mentioning the `In Progress` transition, not the new `Blocked` one — also fixed, so a round-3 status change triggers a dashboard regen too.
+
 ## v9.9 changes (over v9.8) — module documentation moved back to upfront, JIT trigger removed
 
 `full-doc/` finally diverges on its own defining feature. Since v8, `5-modules/` and `6-development/`'s late wave generated just-in-time, triggered by `7-sprint-planning/1-sprint-planning.md` step 2a as each module's epic became a sprint candidate — `full-doc/` had carried that same JIT behavior unchanged through v9.2-v9.8 despite its name, because the redesign (approved 2026-08-20, spec at `docs/superpowers/specs/2026-08-20-upfront-module-docs-design.md`) was written but never applied. Implemented now, at the user's request, after the gap surfaced in conversation.

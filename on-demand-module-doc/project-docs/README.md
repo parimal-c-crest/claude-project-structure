@@ -147,6 +147,28 @@ If you improve `prompts/` or `docs-templates/` on a real project later (the same
 
 **Note on `Prompt version` lines vs. this changelog:** the changelog below records the *notable* changes behind each version bump, not every bump — a file's on-disk `**Prompt version:**` line can be ahead of the highest version this changelog mentions for it (a later, undocumented touch-up). The changelog entry is still accurate for what it describes; it just isn't a complete version history. Treat the file's own header line as the source of truth for "what version is this," and this changelog as "why did notable versions change," not a 1:1 log of every bump.
 
+## v9.3 changes (over v9.2) — code review auto-loop capped at 2 rounds, ported from full-doc
+
+`8-implementation/2-code-review.md`'s send-back-and-re-review loop had no round limit — a task could bounce between fix and fresh-session review indefinitely chasing a zero-issue signal. User requested a hard cap, since 2 independent review passes is enough judgment before a persisting disagreement needs a human, not a 3rd automated pass. Not JIT-vs-upfront specific, so ported here identically from `full-doc/`'s v9.10.
+
+- **`8-implementation/2-code-review.md`** (bumped 1.4→1.5) — new step 8b: before acting on a **Changes requested** verdict, count existing `## Review Round N` sections in `{{task_id}}-review.md`. Round 1 or 2 proceeds as before (status back to `In Progress`, re-run in a new session). Round 3 instead sets the task to `Blocked` with a "review loop cap reached — needs human decision" note and stops the auto-loop. New Guardrail and Completion Checklist item added to match.
+- Applied identically to both packaged skills' mirrors (`full-document-kit`, `on-demand-document-kit`).
+- `9-sync-docs/2-module-completion-review.md`'s separate user-live-browser-confirmation loop is untouched — bounded by a real human confirming real behavior each round, not an agent re-judging agent-fixed code.
+- Change went through 2 independent fresh-session reviews before landing: round 1 caught the "Next Step" section still saying unconditionally "this prompt re-run" — fixed to caveat round 1/2 vs. round 3/`Blocked`. Round 2 approved, and separately flagged the "Dashboard refresh" section only mentioning the `In Progress` transition, not the new `Blocked` one — also fixed, so a round-3 status change triggers a dashboard regen too.
+
+## v9.2 changes (over v9.1) — quality improvements ported from the full-doc sibling copy, JIT kept intact
+
+`full-doc/project-docs/` (a sibling copy of this same kit) diverged this session into a separate variant that generates all module documentation upfront instead of just-in-time — that redesign is **not** ported here; `on-demand-module-doc/` remains the JIT reference variant, unchanged in that respect. Everything else `full-doc/` improved along the way (v9.2 through v9.8 there) that wasn't specific to upfront-vs-JIT timing was ported here too, at the user's request, so both copies share the same process quality.
+
+- **Dashboard**: full Milestone→Epic→Task→Todo drill-down (was Task-level only); auto-regenerates after any Task/Epic/Sprint/Milestone status change (`1-implement-task.md`, `2-code-review.md`, `2-module-completion-review.md`, `1-sprint-planning.md`), not per-Todo-tick. Per-sprint HTML page (`7-sprint-planning/3-generate-sprint-page.md`) removed — the dashboard is the one HTML view now.
+- **Per-document question-blocking, explicit.** All 7 `3-document-generate/*.md` batch files gained a Guardrails bullet: never start the next document while the current one has an unresolved open question. Was already implied by "stop and ask"; now stated as a hard rule.
+- **Implement → review → test now run in three separate sessions, always** — not just implement+review together. Self-review-bias fix: the same conversation that wrote the code (or reviewed it) shares its own blind spots; a fresh session with no memory of writing it gives an independent look at each stage.
+- **`docs-templates/README.md` rewritten** — was stale (predated the `project-docs/` nesting, called the root folder `docs/`, said "Framework Version: V1"). Rewritten to match current terminology, and to describe the JIT trigger this copy actually uses (not `full-doc/`'s upfront loop).
+- **`sot-docs/design/design-source.md`** — no longer a manual checkbox. Auto-detected from `screenshots/`/`figma-reference.md`/`tokens.json`/raw SoT mentions, stated finding confirmed with the developer before being set, written as a plain `Source:`/`Confirmed:` value.
+- **Working files written compact** — `{{task_id}}-todos.md`, `-review.md`, `-test-report.md`, `session-log.md` (new) are terse, re-read-often working notes, not deliverables. `docs-kit/`/`sot-docs/` untouched, still full-prose.
+- **New "Session-end checkpoint" convention** (`claude-docs/plan/session-log.md`), paired with the existing session-start recap — captures *why* a session stopped and what's next specifically, not just *what* state files show.
+- **Not ported:** the upfront module-documentation redesign itself (`5-modules/`/`6-development` late-wave trigger, `7-sprint-planning` step 2a, `6-implementation-plan`'s task-list derivation timing) — this copy's whole reason to exist separately from `full-doc/` is that it keeps JIT. `docs.zip` removal and the pre-commit hook (`.githooks/pre-commit`, repo root) already covered both copies from the start, not specific to either.
+
 ## v9.1 changes (over v9) — fixes found by actually running v9's field-extraction on a real module
 
 Found while running `0-field-extraction.md` for real, for the first time, against a live legacy

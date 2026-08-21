@@ -1,12 +1,12 @@
 # Design Creation
 
-**Prompt version:** 1.0
+**Prompt version:** 1.1
 
 ## Role
 You are a UI/UX designer establishing a visual design direction from scratch, for a project with no existing brand or design reference.
 
 ## When to run this
-Only when `project-docs/sot-docs/design/design-source.md` has `none` checked and the user chose (in `3-sot-review.md`) to have a real design created rather than fall back to generic defaults. If a Figma/screenshots/tokens reference already exists, this phase doesn't apply — `3-sot-review.md` already routes around it.
+Only when `project-docs/sot-docs/design/design-source.md`'s `Source:` is `None` (or blank) and the user chose (in `3-sot-review.md`) to have a real design created rather than fall back to generic defaults. If a Figma/screenshots/tokens reference already exists, this phase doesn't apply — `3-sot-review.md` already routes around it.
 
 ## Objective
 Produce a coherent, professional design direction (color palette, typography, spacing/shape system, component style) and write it out as a `tokens.json` the rest of the workflow can consume exactly like a user-supplied one.
@@ -27,11 +27,11 @@ Produce a coherent, professional design direction (color palette, typography, sp
    - Icon style: a stated convention (e.g. outlined vs. filled, a specific icon library) — pick one, don't leave it open.
 5. Check contrast ratios on every text/background color pairing against WCAG AA at minimum, unless the project has stated no accessibility requirement — flag any pairing that fails rather than shipping it silently.
 6. Write the finalized token set to `project-docs/sot-docs/design/tokens.json`, matching the same structure/shape a manually-supplied token file would have (so `docs-kit/4-ui/3-design-system.md` generation doesn't need special-case handling for a generated vs. user-supplied source).
-7. Update `project-docs/sot-docs/design/design-source.md` to check `tokens` (not a new category) — from this point on, a generated token set and a user-supplied one are indistinguishable to the rest of the workflow.
+7. Update `project-docs/sot-docs/design/design-source.md`: set `Source: Design tokens` and `Confirmed:` to today's date (not a new category — same value a user-supplied token set would carry) — from this point on, a generated token set and a user-supplied one are indistinguishable to the rest of the workflow.
 
 ## Output
 - `project-docs/sot-docs/design/tokens.json` — complete, contrast-checked token set.
-- `project-docs/sot-docs/design/design-source.md` updated to check `tokens`.
+- `project-docs/sot-docs/design/design-source.md` updated: `Source: Design tokens`, `Confirmed:` set.
 
 ## Guardrails
 - Don't generate a full token set before the user has picked a direction (step 3) — that's how mismatched, wasted work happens.
@@ -44,7 +44,7 @@ Produce a coherent, professional design direction (color palette, typography, sp
 - [ ] Full token set produced: color, typography, spacing, shape, icon convention
 - [ ] Contrast checked against WCAG AA (or the project's stated requirement)
 - [ ] `project-docs/sot-docs/design/tokens.json` written
-- [ ] `project-docs/sot-docs/design/design-source.md` updated to `tokens`
+- [ ] `project-docs/sot-docs/design/design-source.md` updated to `Source: Design tokens`
 
 ## Next Step
 Run `project-docs/prompts/1-discovery/5-project-analysis.md` next.

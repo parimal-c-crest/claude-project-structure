@@ -1,6 +1,6 @@
 # Generate: All Development Documents (6-development, batch)
 
-**Prompt version:** 1.3
+**Prompt version:** 1.4
 
 ## Role
 You are a technical writer / architect generating the full `6-development/` documentation set — all 10 documents — at professional quality, using the project's own templates as the required structure.
@@ -46,6 +46,7 @@ If a previous run of either wave stopped partway through, don't restart that wav
 - Late wave: `project-docs/claude-docs/drafts/6-development/5-implementation-workflow.md`, `6-testing-strategy.md`, `7-deployment-strategy.md`, `10-debugging-guide.md` — created on the first module that triggers this wave, updated in place on every subsequent module.
 
 ## Guardrails
+- Never start drafting the next document in this wave while the current one has an open, unanswered question — resolve it first (a real user answer, or an explicit "use your judgment" recorded as `[Assumption: ...]`), per step 4's Never-silently-assume rule.
 - Don't skip a document; if something genuinely doesn't apply, still create the file with an explicit "Not Applicable — reason" note rather than omitting it.
 - Never write into `project-docs/docs-templates/`.
 - Never generate the late wave for a module whose own `05-modules/` documentation isn't done yet — stop and name what's missing instead. Unlike the old model, this is a per-module check, not a whole-`module-list.md` one.

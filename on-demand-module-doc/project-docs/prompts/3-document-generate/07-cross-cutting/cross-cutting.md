@@ -1,6 +1,6 @@
 # Generate: All Cross-Cutting Documents (7-cross-cutting, batch)
 
-**Prompt version:** 1.4
+**Prompt version:** 1.5
 
 ## Role
 You are a technical writer / architect (and, for the threat model, a security engineer) generating the full `7-cross-cutting/` documentation set — both documents — at professional quality, using the project's own templates as the required structure.
@@ -38,6 +38,7 @@ If a previous run of this prompt stopped partway through, don't restart from doc
 - `project-docs/claude-docs/drafts/7-cross-cutting/1-non-functional-requirements.md`, `2-threat-model.md`
 
 ## Guardrails
+- Never start drafting the next document in this batch while the current one has an open, unanswered question — resolve it first (a real user answer, or an explicit "use your judgment" recorded as `[Assumption: ...]`), per step 5's Never-silently-assume rule.
 - Don't skip a document; if something genuinely doesn't apply, still create the file with an explicit "Not Applicable — reason" note rather than omitting it.
 - Never write into `project-docs/docs-templates/`.
 - Don't invent specific SLA/performance numbers unlabeled — an unsourced "99.9% uptime" reads as a real commitment, not a placeholder.
